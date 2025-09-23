@@ -1,0 +1,9 @@
+Django>=4.2
+djangorestframework
+djangorestframework-simplejwt
+django-filter
+Pillow                 # uploads de imagens
+drf-yasg               # documentação swagger (opcional)
+weasyprint             # para gerar PDFs do contrato (ou xhtml2pdf)
+psycopg2-binary        # se usar Postgres
+django-cors-headers
