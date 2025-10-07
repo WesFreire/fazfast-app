@@ -129,7 +129,7 @@ const FazFastHome: React.FC = () => {
                   key={i}
                   className="flex flex-col items-center bg-gray-100 rounded-xl p-6 hover:bg-gray-200 hover:shadow-md transition cursor-pointer min-w-[120px]"
                 >
-                  <img src={cat.img} alt={cat.name} className="w-10 h-10 mb-3" />
+                  <img src={cat.img} alt={cat.name} className="w-7 h-7 mb-3" />
                   <span className="text-sm font-medium">{cat.name}</span>
                 </div>
               ))}
@@ -173,7 +173,7 @@ const FazFastHome: React.FC = () => {
                   <span className="ml-1 text-gray-600 text-sm">5.0</span>
                 </div>
                 <h3 className="font-semibold text-lg">
-                  Marcello Von Richthofen
+                  Marcello Pereira Araujo
                 </h3>
                 <p className="text-sm text-gray-500">Profissional</p>
                 <button className="mt-4 bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-700 transition">
