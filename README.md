@@ -1,8 +1,7 @@
-FazFast - Plataforma de Serviços Rápidos
-
-Descrição
+**FazFast - Plataforma de Serviços Rápidos**
 
 FazFast é uma plataforma web para conectar clientes a prestadores de serviços de forma rápida e segura.
+
 O sistema inclui funcionalidades como:
 
 Cadastro de usuários com papéis distintos (cliente e prestador).
@@ -17,7 +16,7 @@ Notificações do sistema.
 
 Autenticação JWT para segurança total das APIs.
 
-Tecnologias utilizadas
+**Tecnologias utilizadas**
 
 Python
 
