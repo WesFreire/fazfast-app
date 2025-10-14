@@ -1,31 +1,20 @@
-**FazFast - Plataforma de Serviços Rápidos**
+**📝 1. Visão Geral do Projeto – FazFast**
 
-FazFast é uma plataforma web para conectar clientes a prestadores de serviços de forma rápida e segura.
+FazFast é uma plataforma inspirada no modelo do iFood, porém focada em serviços ao invés de comida.
+O objetivo do sistema é conectar clientes a prestadores de serviços de forma rápida, segura e eficiente, oferecendo uma experiência moderna e intuitiva.
 
-O sistema inclui funcionalidades como:
+**A plataforma permite:**
 
-Cadastro de usuários com papéis distintos (cliente e prestador).
+Cadastro de prestadores de serviços (ex: eletricista, encanador, diarista, designer, professor particular, etc.);
 
-Gestão de serviços oferecidos pelos prestadores.
+Solicitação de serviços por clientes com detalhes e agendamento;
 
-Contratos e agendamento de serviços.
+Sistema de matching entre clientes e prestadores disponíveis;
 
-Avaliações e feedback entre usuários.
+Acompanhamento do status do serviço em tempo real;
 
-Notificações do sistema.
+Gerenciamento de usuários, autenticação JWT e permissões;
 
-Autenticação JWT para segurança total das APIs.
+Base tecnológica escalável, seguindo boas práticas de arquitetura.
 
-**Tecnologias utilizadas**
-
-Python
-
-Django
-
-Django REST Framework
-
-SQLite (banco de dados para desenvolvimento)
-
-Simple JWT para autenticação
-
-Front-end em Next Js
+Em resumo: o FazFast é um marketplace de serviços, permitindo que qualquer pessoa encontre o profissional certo com poucos cliques — rápido como pedir comida, mas para qualquer tipo de serviço.
