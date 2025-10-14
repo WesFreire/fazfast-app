@@ -2,7 +2,7 @@ from rest_framework.routers import DefaultRouter
 from .viewsets import (
     UsuarioViewSet,
     ServicoViewSet,
-    PortfolioViewSet,
+    PortfolioItemViewSet,
     ContratoViewSet,
     AvaliacaoViewSet,
     NotificacaoViewSet,
@@ -11,7 +11,7 @@ from .viewsets import (
 router = DefaultRouter()
 router.register(r'usuarios', UsuarioViewSet)
 router.register(r'servicos', ServicoViewSet)
-router.register(r'portfolios', PortfolioViewSet)
+router.register(r'portfolio-items', PortfolioItemViewSet)
 router.register(r'contratos', ContratoViewSet)
 router.register(r'avaliacoes', AvaliacaoViewSet)
 router.register(r'notificacoes', NotificacaoViewSet)
