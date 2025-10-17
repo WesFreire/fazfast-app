@@ -119,38 +119,77 @@ const GerarQRCode: React.FC = () => {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-black text-gray-300 py-12 mt-12">
-        <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12">
-          <div>
-            <h3 className="text-2xl font-bold text-green-600 mb-4">FazFast</h3>
-            <p className="text-sm leading-relaxed">
-              Plataforma de serviços sob demanda, conectando clientes e profissionais em todo o Brasil com qualidade e confiança.
-            </p>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-4">Assistência ao Cliente</h4>
-            <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:underline">Buscar</a></li>
-              <li><a href="#" className="hover:underline">Recomendado</a></li>
-              <li><a href="#" className="hover:underline">Categorias</a></li>
-              <li><a href="#" className="hover:underline">Perguntas Frequentes</a></li>
-              <li><a href="#" className="hover:underline">Termos de Uso</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-4">Conecte-se</h4>
-            <div className="flex space-x-4 text-xl">
-              <a href="#" className="hover:text-green-600">🐦</a>
-              <a href="#" className="hover:text-green-600">📘</a>
-              <a href="#" className="hover:text-green-600">📸</a>
-            </div>
-          </div>
-        </div>
-        <div className="mt-8 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()} FazFast. Todos os direitos reservados.
-        </div>
-      </footer>
+     {/* Footer */}
+<footer className="bg-black text-gray-300 py-12 mt-12">
+  <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12">
+    {/* Logo & Description */}
+    <div>
+      <img
+        src="/Images/FazFastLogo_Inv.png"
+        alt="FazFast Logo"
+        className="h-12 mb-4"
+      />
+      <p className="text-sm leading-relaxed">
+        Plataforma de serviços sob demanda, conectando clientes e
+        profissionais em todo o Brasil com qualidade e confiança.
+      </p>
+    </div>
+
+    {/* Links */}
+    <nav>
+      <h4 className="font-semibold mb-4 text-white">Assistência ao Cliente</h4>
+      <ul className="space-y-2 text-sm">
+        <li>
+          <a href="#" className="hover:text-green-600 transition-colors duration-200">
+            Buscar
+          </a>
+        </li>
+        <li>
+          <a href="#" className="hover:text-green-600 transition-colors duration-200">
+            Recomendado
+          </a>
+        </li>
+        <li>
+          <a href="#" className="hover:text-green-600 transition-colors duration-200">
+            Categorias
+          </a>
+        </li>
+        <li>
+          <a href="#" className="hover:text-green-600 transition-colors duration-200">
+            Perguntas Frequentes
+          </a>
+        </li>
+        <li>
+          <a href="#" className="hover:text-green-600 transition-colors duration-200">
+            Termos de Uso
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    {/* Social Media */}
+    <div>
+      <h4 className="font-semibold mb-4 text-white">Conecte-se</h4>
+      <div className="flex space-x-4">
+        <a href="#" aria-label="X (Twitter)" className="transition-transform duration-200 hover:scale-110">
+          <img src="/Images/X_Logo.png" alt="X" className="h-8 w-8 object-contain" />
+        </a>
+        <a href="#" aria-label="TikTok" className="transition-transform duration-200 hover:scale-110">
+          <img src="/Images/TikTok_Logo.png" alt="TikTok" className="h-8 w-8 object-contain" />
+        </a>
+        <a href="#" aria-label="Instagram" className="transition-transform duration-200 hover:scale-110">
+          <img src="/Images/Instagram_Logo.png" alt="Instagram" className="h-8 w-8 object-contain" />
+        </a>
+      </div>
+    </div>
+  </div>
+
+  {/* Bottom line */}
+  <div className="mt-10 border-t border-gray-800 pt-6 text-center text-sm text-gray-500">
+    © {new Date().getFullYear()} <span className="text-white font-semibold">FazFast</span>. Todos os direitos reservados.
+  </div>
+</footer>
+
     </div>
   );
 };
