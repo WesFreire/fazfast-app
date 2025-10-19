@@ -11,6 +11,7 @@ const PagamentoPage: React.FC = () => {
   const [numero, setNumero] = useState("");
   const [validade, setValidade] = useState("");
   const [cvv, setCvv] = useState("");
+  const [cardType, setCardType] = useState<"visa" | "mastercard" | "elo" | "unknown">("unknown");
 
   const revealRefs = useRef<HTMLDivElement[]>([]);
 
@@ -50,16 +51,63 @@ const PagamentoPage: React.FC = () => {
     };
   }, []);
 
+  // Função para detectar o tipo de cartão
+  const detectCardType = (number: string): "visa" | "mastercard" | "elo" | "unknown" => {
+    if (number.length < 4) return "unknown";
+
+    // Visa: começa com 4
+    if (number.startsWith("4")) return "visa";
+
+    // Mastercard: 51-55 ou 2221-2720
+    if (
+      /^5[1-5]/.test(number) ||
+      /^(222[1-9]|22[3-9]\d|2[3-6]\d{2}|27[01]\d|2720)/.test(number)
+    ) {
+      return "mastercard";
+    }
+
+    // Elo: prefixos comuns e ranges
+    const eloPrefixes = [
+      "401178",
+      "401179",
+      "431274",
+      "438935",
+      "451416",
+      "457631",
+      "457632",
+      "504175",
+      "627780",
+      "636297",
+      "636368",
+    ];
+
+    const eloRanges = [
+      { start: 506699, end: 506778 },
+      { start: 509000, end: 509999 },
+      { start: 650033, end: 650552 },
+      { start: 650978, end: 651659 },
+      { start: 655000, end: 655021 },
+    ];
+
+    if (eloPrefixes.some((prefix) => number.startsWith(prefix))) return "elo";
+
+    const bin = parseInt(number.slice(0, 6), 10);
+    if (eloRanges.some((range) => bin >= range.start && bin <= range.end)) return "elo";
+
+    return "unknown";
+  };
+
   // Handlers para formatação
   const handleNomeChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g, ""); // Só letras e espaço
-    setNome(value.toUpperCase());
+    const value = e.target.value.replace(/[^A-Za-zÀ-ÿ\s]/g, "").toUpperCase();
+    setNome(value);
   };
 
   const handleNumeroChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, "").slice(0, 16);
-    const formatted = value.replace(/(\d{4})/g, "$1 ").trim();
+    const rawValue = e.target.value.replace(/\D/g, "").slice(0, 16);
+    const formatted = rawValue.replace(/(\d{4})(?=\d)/g, "$1 ").trim();
     setNumero(formatted);
+    setCardType(detectCardType(rawValue));
   };
 
   const handleValidadeChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -75,6 +123,21 @@ const PagamentoPage: React.FC = () => {
     setCvv(value);
   };
 
+  const getCardLogo = () => {
+    switch (cardType) {
+      case "visa":
+        return "/Images/Visa_Logo.png";
+      case "mastercard":
+        return "/Images/Mastercard_Logo.png";
+      case "elo":
+        return "/Images/Elo_Logo.png";
+      default:
+        return null;
+    }
+  };
+
+  const cardLogoSrc = getCardLogo();
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {/* Header */}
@@ -87,7 +150,7 @@ const PagamentoPage: React.FC = () => {
             height={40}
             className="h-10 w-auto"
           />
-          <nav className="hidden md:flex space-x-8 font-medium">
+          <nav className="hidden md:flex space-x-8 font-medium text-gray-700">
             <a href="#" className="hover:text-green-600 transition">
               Home
             </a>
@@ -105,7 +168,7 @@ const PagamentoPage: React.FC = () => {
             <input
               type="text"
               placeholder="Buscar..."
-              className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900"
             />
             <button className="text-gray-600 hover:text-green-600 transition">
               <svg
@@ -128,7 +191,7 @@ const PagamentoPage: React.FC = () => {
 
       {/* Steps */}
       <div className="bg-white border-b py-4">
-        <div className="container mx-auto flex justify-center space-x-10 text-sm font-medium">
+        <div className="container mx-auto flex justify-center space-x-10 text-sm font-medium text-gray-700">
           <div className="flex items-center space-x-2 text-gray-400">
             <div className="w-6 h-6 rounded-full flex items-center justify-center border border-gray-300 text-xs">
               1
@@ -141,8 +204,8 @@ const PagamentoPage: React.FC = () => {
             </div>
             <span>Shipping</span>
           </div>
-          <div className="flex items-center space-x-2 text-black">
-            <div className="w-6 h-6 rounded-full flex items-center justify-center bg-black text-white text-xs">
+          <div className="flex items-center space-x-2 text-gray-900">
+            <div className="w-6 h-6 rounded-full flex items-center justify-center bg-gray-900 text-white text-xs">
               3
             </div>
             <span>Payment</span>
@@ -175,7 +238,12 @@ const PagamentoPage: React.FC = () => {
               <strong>Endereço:</strong> Rua Savanna Oliveira, 183, Bairro Lua Amena
             </p>
             <p>
-              <strong>Método de pagamento:</strong> Cartão de Crédito
+              <strong>Método de pagamento:</strong>{" "}
+              {metodoPagamento === "credito"
+                ? "Cartão de Crédito"
+                : metodoPagamento === "debito"
+                ? "Cartão de Débito"
+                : "PayPal"}
             </p>
           </div>
 
@@ -205,7 +273,7 @@ const PagamentoPage: React.FC = () => {
               onClick={() => setMetodoPagamento("credito")}
               className={`pb-2 ${
                 metodoPagamento === "credito"
-                  ? "border-b-2 border-black font-medium text-gray-900"
+                  ? "border-b-2 border-gray-900 font-medium text-gray-900"
                   : "text-gray-500"
               }`}
             >
@@ -215,7 +283,7 @@ const PagamentoPage: React.FC = () => {
               onClick={() => setMetodoPagamento("paypal")}
               className={`pb-2 ${
                 metodoPagamento === "paypal"
-                  ? "border-b-2 border-black font-medium text-gray-900"
+                  ? "border-b-2 border-gray-900 font-medium text-gray-900"
                   : "text-gray-500"
               }`}
             >
@@ -225,7 +293,7 @@ const PagamentoPage: React.FC = () => {
               onClick={() => setMetodoPagamento("debito")}
               className={`pb-2 ${
                 metodoPagamento === "debito"
-                  ? "border-b-2 border-black font-medium text-gray-900"
+                  ? "border-b-2 border-gray-900 font-medium text-gray-900"
                   : "text-gray-500"
               }`}
             >
@@ -238,14 +306,14 @@ const PagamentoPage: React.FC = () => {
               {/* Cartão visual */}
               <div className="relative bg-gradient-to-br from-gray-900 to-black rounded-2xl p-6 text-white shadow-xl">
                 <div className="flex justify-between items-center mb-8">
-                  <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-6 bg-yellow-400 rounded-md flex items-center justify-center">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
                       strokeWidth={2}
                       stroke="black"
-                      className="w-6 h-6"
+                      className="w-5 h-5"
                     >
                       <path
                         strokeLinecap="round"
@@ -254,13 +322,15 @@ const PagamentoPage: React.FC = () => {
                       />
                     </svg>
                   </div>
-                  <Image
-                    src="/Images/Mastercard_Logo.png"
-                    alt="Mastercard"
-                    width={50}
-                    height={30}
-                    className="object-contain"
-                  />
+                  {cardLogoSrc && (
+                    <Image
+                      src={cardLogoSrc}
+                      alt={`${cardType} Logo`}
+                      width={50}
+                      height={30}
+                      className="object-contain"
+                    />
+                  )}
                 </div>
                 <div className="tracking-widest text-lg font-semibold mb-4">
                   {numero || "•••• •••• •••• ••••"}
@@ -272,20 +342,20 @@ const PagamentoPage: React.FC = () => {
               </div>
 
               {/* Formulário */}
-              <form className="space-y-4 ">
+              <form className="space-y-4">
                 <input
                   type="text"
                   placeholder="Nome do titular do cartão"
                   value={nome}
                   onChange={handleNomeChange}
-                  className="w-full px-4 py-3 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-black"
+                  className="w-full px-4 py-3 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900"
                 />
                 <input
                   type="text"
                   placeholder="Número do cartão"
                   value={numero}
                   onChange={handleNumeroChange}
-                  className="w-full px-4 py-3 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-black"
+                  className="w-full px-4 py-3 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900"
                 />
                 <div className="grid grid-cols-2 gap-4">
                   <input
@@ -293,19 +363,19 @@ const PagamentoPage: React.FC = () => {
                     placeholder="Data de Validade (MM/AA)"
                     value={validade}
                     onChange={handleValidadeChange}
-                    className="px-4 py-3 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-black"
+                    className="px-4 py-3 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900"
                   />
                   <input
                     type="text"
                     placeholder="CVV"
                     value={cvv}
                     onChange={handleCvvChange}
-                    className="px-4 py-3 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-black"
+                    className="px-4 py-3 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900"
                   />
                 </div>
 
                 <div className="flex items-center space-x-2 text-sm">
-                  <input type="checkbox" id="save-card" className="h-4 w-4 accent-black" />
+                  <input type="checkbox" id="save-card" className="h-4 w-4 accent-gray-900" />
                   <label htmlFor="save-card" className="text-gray-700">
                     Salvar informações do Cartão
                   </label>
@@ -314,18 +384,32 @@ const PagamentoPage: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4 pt-2">
                   <button
                     type="button"
-                    className="border rounded-lg py-3 font-medium hover:bg-gray-100 transition"
+                    className="border rounded-lg py-3 font-medium hover:bg-gray-100 transition text-gray-900"
                   >
                     Voltar
                   </button>
                   <button
                     type="submit"
-                    className="bg-black text-white rounded-lg py-3 font-medium hover:bg-gray-800 transition"
+                    className="bg-gray-900 text-white rounded-lg py-3 font-medium hover:bg-gray-800 transition"
                   >
                     Pagar
                   </button>
                 </div>
               </form>
+            </div>
+          )}
+
+          {metodoPagamento === "debito" && (
+            <div className="space-y-6">
+              {/* Implementação similar ao crédito, mas para débito */}
+              <p className="text-gray-700">Formulário de Cartão de Débito em desenvolvimento.</p>
+            </div>
+          )}
+
+          {metodoPagamento === "paypal" && (
+            <div className="space-y-6">
+              {/* Implementação para PayPal */}
+              <p className="text-gray-700">Integração com PayPal em desenvolvimento.</p>
             </div>
           )}
         </div>
@@ -341,7 +425,8 @@ const PagamentoPage: React.FC = () => {
               className="h-12 mb-4"
             />
             <p className="text-sm leading-relaxed">
-              Plataforma de serviços sob demanda, conectando clientes e profissionais em todo o Brasil.
+              Plataforma de serviços sob demanda, conectando clientes e
+              profissionais em todo o Brasil com qualidade e confiança.
             </p>
           </div>
           <nav>
@@ -349,31 +434,46 @@ const PagamentoPage: React.FC = () => {
               Assistência ao Cliente
             </h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="#" className="hover:text-green-600">Buscar</a></li>
-              <li><a href="#" className="hover:text-green-600">Recomendado</a></li>
-              <li><a href="#" className="hover:text-green-600">Categorias</a></li>
-              <li><a href="#" className="hover:text-green-600">Perguntas Frequentes</a></li>
-              <li><a href="#" className="hover:text-green-600">Termos de Uso</a></li>
+              {["Buscar", "Recomendado", "Categorias", "Perguntas Frequentes", "Termos de Uso"].map((link) => (
+                <li key={link}>
+                  <a
+                    href="#"
+                    className="hover:text-green-600 transition-colors duration-300"
+                  >
+                    {link}
+                  </a>
+                </li>
+              ))}
             </ul>
           </nav>
           <div>
             <h4 className="font-semibold mb-4 text-white">Conecte-se</h4>
             <div className="flex space-x-4">
-              <a href="#" aria-label="X" className="hover:scale-110 transition-transform">
-                <img src="/Images/X_Logo.png" alt="X" className="h-8 w-8" />
-              </a>
-              <a href="#" aria-label="TikTok" className="hover:scale-110 transition-transform">
-                <img src="/Images/TikTok_Logo.png" alt="TikTok" className="h-8 w-8" />
-              </a>
-              <a href="#" aria-label="Instagram" className="hover:scale-110 transition-transform">
-                <img src="/Images/Instagram_Logo.png" alt="Instagram" className="h-8 w-8" />
-              </a>
+              {[
+                { alt: "X", img: "/Images/X_Logo.png" },
+                { alt: "TikTok", img: "/Images/TikTok_Logo.png" },
+                { alt: "Instagram", img: "/Images/Instagram_Logo.png" },
+              ].map((social) => (
+                <a
+                  key={social.alt}
+                  href="#"
+                  aria-label={social.alt}
+                  className="transition-transform duration-300 hover:scale-110"
+                >
+                  <img
+                    src={social.img}
+                    alt={social.alt}
+                    className="h-8 w-8 object-contain"
+                  />
+                </a>
+              ))}
             </div>
           </div>
         </div>
         <div className="mt-10 border-t border-gray-800 pt-6 text-center text-sm text-gray-500">
           © {new Date().getFullYear()}{" "}
-          <span className="text-white font-semibold">FazFast</span>. Todos os direitos reservados.
+          <span className="text-white font-semibold">FazFast</span>. Todos os
+          direitos reservados.
         </div>
       </footer>
     </div>

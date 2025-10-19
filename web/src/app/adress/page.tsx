@@ -37,7 +37,7 @@ const EscolherEndereco: React.FC = () => {
             height={40}
             className="h-10 w-auto"
           />
-          <nav className="hidden md:flex space-x-8 font-medium">
+          <nav className="hidden md:flex space-x-8 font-medium text-gray-900">
             <a href="#" className="hover:text-green-600 transition">Home</a>
             <a href="#" className="hover:text-green-600 transition">Sobre</a>
             <a href="#" className="hover:text-green-600 transition">Contato</a>
