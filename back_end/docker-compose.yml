@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:15
+    container_name: fazfast-db
+    environment:
+      POSTGRES_DB: fazfast
+      POSTGRES_USER: fazfastuser
+      POSTGRES_PASSWORD: fazfastpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+volumes:
+  postgres_data:

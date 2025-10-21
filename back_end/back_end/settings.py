@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -62,6 +62,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # endereço do Next.js
 ]
 
 ROOT_URLCONF = 'back_end.urls'
@@ -96,13 +101,17 @@ WSGI_APPLICATION = 'back_end.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'fazfast',
+        'USER': 'fazfastuser',
+        'PASSWORD': 'fazfastpass',  # deve ser IGUAL ao do docker-compose
+        'HOST': 'localhost',        # se o Django roda localmente (fora do container)
+        'PORT': '5432',
     }
 }
+
 
 
 # Password validation
