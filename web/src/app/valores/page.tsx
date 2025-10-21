@@ -2,12 +2,11 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { QRCodeSVG } from "qrcode.react";
 import { motion } from "framer-motion";
 
-const GerarQRCode: React.FC = () => {
-  const [profissional, setProfissional] = useState("Nome do Profissional");
-  const url = "https://w.app/p0txyq"; // ✅ Link fixo
+const DefinicaoDeValores: React.FC = () => {
+  const [selectedOption, setSelectedOption] = useState<"aceitar" | "negociar" | null>(null);
+  const valorProposto = 523;
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-gray-800 overflow-x-hidden">
@@ -39,12 +38,12 @@ const GerarQRCode: React.FC = () => {
       {/* Etapas */}
       <div className="bg-white border-b py-4">
         <div className="container mx-auto flex justify-center space-x-10 text-sm font-medium">
-          <div className="flex items-center space-x-2 text-green-600">
-            <div className="w-6 h-6 rounded-full flex items-center justify-center bg-green-600 text-white text-xs">1</div>
+          <div className="flex items-center space-x-2 text-gray-400">
+            <div className="w-6 h-6 rounded-full flex items-center justify-center border border-gray-300 text-xs">1</div>
             <span>Contato</span>
           </div>
-          <div className="flex items-center space-x-2 text-gray-400">
-            <div className="w-6 h-6 rounded-full flex items-center justify-center border border-gray-300 text-xs">2</div>
+          <div className="flex items-center space-x-2 text-green-600">
+            <div className="w-6 h-6 rounded-full flex items-center justify-center bg-green-600 text-white text-xs">2</div>
             <span>Definir valores</span>
           </div>
           <div className="flex items-center space-x-2 text-gray-400">
@@ -59,51 +58,94 @@ const GerarQRCode: React.FC = () => {
       </div>
 
       {/* Conteúdo principal */}
-      <main className="flex-1 container mx-auto px-4 py-12 flex flex-col items-center">
+      <main className="flex-1 container mx-auto px-4 py-12">
         <motion.h1
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="text-3xl font-bold text-gray-800 mb-8 text-center"
+          className="text-3xl font-bold text-gray-800 text-center mb-8"
         >
-           QR Code do WhatsApp do Profissional.
+          Definição de Valores
         </motion.h1>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
-          className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-lg"
+          className="max-w-2xl mx-auto bg-white shadow-lg rounded-2xl p-8 space-y-8"
         >
+          <p className="text-gray-700 text-center text-lg">
+            O valor definido por <strong>Marcelo Von Richtofen</strong> foi de{" "}
+            <span className="text-green-600 font-bold text-2xl">R$ {valorProposto},00</span>
+          </p>
 
-          <div className="flex flex-col items-center">
-            <p className="mb-3 text-sm text-gray-600 text-center">
-              Escaneie para entrar em contato com <strong>{profissional}</strong> no WhatsApp
-            </p>
+          <div className="space-y-5">
+            {/* Opção Aceitar */}
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.6 }}
-              className="bg-white p-4 border rounded-xl shadow-md mb-4"
+              whileHover={{ scale: 1.02 }}
+              onClick={() => setSelectedOption("aceitar")}
+              className={`flex items-center justify-between border rounded-lg text-gray-900 p-5 cursor-pointer transition shadow-sm ${
+                selectedOption === "aceitar"
+                  ? "border-green-600 bg-green-50"
+                  : "border-gray-300 bg-white"
+              }`}
             >
-              <QRCodeSVG value={url} size={200} />
+              <div>
+                <span className="font-semibold block">Aceitar</span>
+                <span className="text-gray-600 text-sm">Aceitar valor proposto pelo profissional</span>
+              </div>
+              <div
+                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${
+                  selectedOption === "aceitar" ? "border-green-600" : "border-gray-400"
+                }`}
+              >
+                {selectedOption === "aceitar" && (
+                  <div className="w-2.5 h-2.5 bg-green-600 rounded-full"></div>
+                )}
+              </div>
             </motion.div>
-            <div className="flex flex-col space-y-3 w-full">
-              <button
-                onClick={() => navigator.clipboard.writeText(url)}
-                className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium"
+
+            {/* Opção Negociar */}
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              onClick={() => setSelectedOption("negociar")}
+              className={`flex items-center justify-between border rounded-lg p-5 cursor-pointer transition shadow-sm ${
+                selectedOption === "negociar"
+                  ? "border-green-600 bg-green-50"
+                  : "border-gray-300 bg-white"
+              }`}
+            >
+              <div>
+                <span className="font-semibold block text-gray-900">Negociar</span>
+                <span className="text-gray-600 text-sm">Voltar para a área de negociação de valores</span>
+              </div>
+              <div
+                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition ${
+                  selectedOption === "negociar" ? "border-green-600" : "border-gray-400"
+                }`}
               >
-                Copiar link
-              </button>
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-3 bg-gray-800 text-white text-center rounded-md hover:bg-gray-900 transition-colors font-medium"
-              >
-                Abrir link
-              </a>
-            </div>
+                {selectedOption === "negociar" && (
+                  <div className="w-2.5 h-2.5 bg-green-600 rounded-full"></div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Botões */}
+          <div className="flex justify-between mt-10">
+            <button className="px-6 py-2 border border-gray-400 rounded-md hover:bg-gray-100 transition font-medium text-gray-600">
+              Voltar
+            </button>
+            <button
+              disabled={!selectedOption}
+              className={`px-6 py-2 rounded-md font-medium transition ${
+                !selectedOption
+                  ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                  : "bg-green-600 text-white hover:bg-green-700"
+              }`}
+            >
+              Próximo
+            </button>
           </div>
         </motion.div>
       </main>
@@ -161,4 +203,4 @@ const GerarQRCode: React.FC = () => {
   );
 };
 
-export default GerarQRCode;
+export default DefinicaoDeValores;

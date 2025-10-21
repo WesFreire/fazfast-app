@@ -72,10 +72,43 @@ function useScrollReveal() {
     return () => observer.disconnect();
   }, [controls]);
 
-    return { ref, controls };
+  return { ref, controls };
 }
 
+const ProfessionalCard: React.FC<{ profissional: Profissional }> = ({ profissional }) => {
+  const { ref, controls } = useScrollReveal();
+
+  const variants = {
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 40 }}
+      animate={controls}
+      variants={variants}
+      className="bg-white rounded-xl shadow hover:shadow-xl hover:-translate-y-1 transition-all duration-200 p-6 text-center"
+    >
+      <img
+        src={profissional.imagem}
+        alt={profissional.nome}
+        className="mx-auto mb-4 rounded-md w-24 h-24 object-cover border-2 border-green-500"
+      />
+      <h3 className="font-semibold text-lg">{profissional.nome}</h3>
+      <p className="text-sm text-gray-500 mb-2">{profissional.materia}</p>
+      <div className="flex justify-center items-center mb-3 text-yellow-500 text-sm">
+        ★ {profissional.avaliacao.toFixed(1)}
+      </div>
+      <button className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition">
+        Contratar
+      </button>
+    </motion.div>
+  );
+};
+
 const Menu: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState("");
   const [filtros, setFiltros] = useState({
     materia: "",
     anos: [] as string[],
@@ -94,7 +127,14 @@ const Menu: React.FC = () => {
   };
 
   const profissionaisFiltrados = mockProfissionais
-    .filter((p) => p.materia.toLowerCase().includes(filtros.materia.toLowerCase()))
+    .filter((p) =>
+      searchTerm === "" ||
+      p.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.materia.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter((p) =>
+      filtros.materia === "" || p.materia.toLowerCase().includes(filtros.materia.toLowerCase())
+    )
     .filter((p) => (filtros.anos.length ? filtros.anos.some((a) => p.anos.includes(a)) : true))
     .filter((p) => (filtros.formacao.length ? filtros.formacao.includes(p.formacao) : true))
     .filter((p) => (filtros.genero.length ? filtros.genero.includes(p.genero) : true))
@@ -105,14 +145,18 @@ const Menu: React.FC = () => {
     });
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
+    <div className="min-h-screen bg-gray-50 font-sans text-gray-800 overflow-x-hidden">
       {/* Header */}
-      <header className="bg-white shadow-md sticky top-0 z-50">
+      <header className="backdrop-blur-md bg-white/80 shadow-sm sticky top-0 z-50 transition">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <img src="/Images/FazFastLogo.png" alt="FazFast Logo" className="h-10" />
           <nav className="hidden md:flex space-x-8 font-medium">
-            {["Home", "Sobre", "Contato", "Blog"].map((item) => (
-              <a key={item} href="#" className="hover:text-green-600 transition">
+            {["Catalogo", "Home", "Perfil"].map((item) => (
+              <a
+                key={item}
+                href="#"
+                className="hover:text-green-600 transition-colors duration-300"
+              >
                 {item}
               </a>
             ))}
@@ -121,18 +165,10 @@ const Menu: React.FC = () => {
             <input
               type="text"
               placeholder="Buscar serviços..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             />
-            <a href="#" className="relative text-gray-600 hover:text-green-600 transition">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-2.3 2.3c-.6.6-.2 1.7.7 1.7H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-            </a>
           </div>
         </div>
       </header>
@@ -177,8 +213,8 @@ const Menu: React.FC = () => {
                 <label key={val} className="flex items-center space-x-2 text-sm mb-1">
                   <input
                     type="checkbox"
-                    checked={(filtros as any)[section.key].includes(val)}
-                    onChange={() => toggleFiltroArray(section.key as any, val)}
+                    checked={filtros[section.key as keyof typeof filtros].includes(val)}
+                    onChange={() => toggleFiltroArray(section.key as "anos" | "formacao" | "genero", val)}
                   />
                   <span>{val}</span>
                 </label>
@@ -204,35 +240,9 @@ const Menu: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {profissionaisFiltrados.map((prof) => {
-              const { ref, controls } = useScrollReveal();
-              return (
-                <motion.div
-                  key={prof.id}
-                  ref={ref}
-                  initial={{ opacity: 0, y: 40 }}
-                  animate={controls}
-                  variants={{
-                    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-                  }}
-                  className="bg-white rounded-xl shadow hover:shadow-xl hover:-translate-y-1 transition-all duration-200 p-6 text-center"
-                >
-                  <img
-                    src={prof.imagem}
-                    alt={prof.nome}
-                    className="mx-auto mb-4 rounded-md w-24 h-24 object-cover border-2 border-green-500"
-                  />
-                  <h3 className="font-semibold text-lg">{prof.nome}</h3>
-                  <p className="text-sm text-gray-500 mb-2">{prof.materia}</p>
-                  <div className="flex justify-center items-center mb-3 text-yellow-500 text-sm">
-                    ★ {prof.avaliacao.toFixed(1)}
-                  </div>
-                  <button className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition">
-                    Contratar
-                  </button>
-                </motion.div>
-              );
-            })}
+            {profissionaisFiltrados.map((prof) => (
+              <ProfessionalCard key={prof.id} profissional={prof} />
+            ))}
           </div>
         </main>
       </div>

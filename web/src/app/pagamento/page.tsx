@@ -139,76 +139,50 @@ const PagamentoPage: React.FC = () => {
   const cardLogoSrc = getCardLogo();
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen bg-gray-50 font-sans text-gray-800 overflow-x-hidden">
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
+      <header className="backdrop-blur-md bg-white/80 shadow-sm sticky top-0 z-50 transition">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <Image
-            src="/Images/FazFastLogo.png"
-            alt="FazFast Logo"
-            width={120}
-            height={40}
-            className="h-10 w-auto"
-          />
-          <nav className="hidden md:flex space-x-8 font-medium text-gray-700">
-            <a href="#" className="hover:text-green-600 transition">
-              Home
-            </a>
-            <a href="#" className="hover:text-green-600 transition">
-              Sobre
-            </a>
-            <a href="#" className="hover:text-green-600 transition">
-              Contato
-            </a>
-            <a href="#" className="hover:text-green-600 transition">
-              Blog
-            </a>
+          <img src="/Images/FazFastLogo.png" alt="FazFast Logo" className="h-10" />
+          <nav className="hidden md:flex space-x-8 font-medium">
+            {["Catalogo", "Home", "Perfil"].map((item) => (
+              <a
+                key={item}
+                href="#"
+                className="hover:text-green-600 transition-colors duration-300"
+              >
+                {item}
+              </a>
+            ))}
           </nav>
           <div className="flex items-center space-x-4">
             <input
               type="text"
-              placeholder="Buscar..."
-              className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900"
+              placeholder="Buscar serviços..."
+              className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             />
-            <button className="text-gray-600 hover:text-green-600 transition">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-2.3 2.3c-.6.6-.2 1.7.7 1.7H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-            </button>
           </div>
         </div>
       </header>
 
-      {/* Steps */}
+      {/* Passos */}
       <div className="bg-white border-b py-4">
-        <div className="container mx-auto flex justify-center space-x-10 text-sm font-medium text-gray-700">
+        <div className="container mx-auto flex justify-center space-x-10 text-sm font-medium">
           <div className="flex items-center space-x-2 text-gray-400">
-            <div className="w-6 h-6 rounded-full flex items-center justify-center border border-gray-300 text-xs">
-              1
-            </div>
-            <span>Address</span>
+            <div className="w-6 h-6 rounded-full flex items-center justify-center border border-gray-300 text-xs">1</div>
+            <span>Contato</span>
           </div>
           <div className="flex items-center space-x-2 text-gray-400">
-            <div className="w-6 h-6 rounded-full flex items-center justify-center border border-gray-300 text-xs">
-              2
-            </div>
-            <span>Shipping</span>
+            <div className="w-6 h-6 rounded-full flex items-center justify-center border border-gray-300 text-xs">2</div>
+            <span>Definir valores</span>
           </div>
-          <div className="flex items-center space-x-2 text-gray-900">
-            <div className="w-6 h-6 rounded-full flex items-center justify-center bg-gray-900 text-white text-xs">
-              3
-            </div>
-            <span>Payment</span>
+          <div className="flex items-center space-x-2 text-gray-400">
+            <div className="w-6 h-6 rounded-full flex items-center justify-center border border-gray-300 text-xs">3</div>
+            <span>Endereço</span>
+          </div>
+          <div className="flex items-center space-x-2 text-green-600">
+            <div className="w-6 h-6 rounded-full flex items-center justify-center bg-green-600 text-white text-xs">4</div>
+            <span>Pagamento</span>
           </div>
         </div>
       </div>

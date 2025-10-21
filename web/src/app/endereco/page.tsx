@@ -20,28 +20,27 @@ const EscolherEndereco: React.FC = () => {
     {
       id: 3,
       title: "Adicionar novo endereço",
-      description: "Cadastrar um endereço adicional para entrega ou retirada",
+      description: "Cadastrar um endereço adicional para o serviço.",
       isNew: true,
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-gray-50 font-sans text-gray-800 overflow-x-hidden">
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-50">
+      <header className="backdrop-blur-md bg-white/80 shadow-sm sticky top-0 z-50 transition">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <Image
-            src="/Images/FazFastLogo.png"
-            alt="FazFast Logo"
-            width={120}
-            height={40}
-            className="h-10 w-auto"
-          />
-          <nav className="hidden md:flex space-x-8 font-medium text-gray-900">
-            <a href="#" className="hover:text-green-600 transition">Home</a>
-            <a href="#" className="hover:text-green-600 transition">Sobre</a>
-            <a href="#" className="hover:text-green-600 transition">Contato</a>
-            <a href="#" className="hover:text-green-600 transition">Blog</a>
+          <img src="/Images/FazFastLogo.png" alt="FazFast Logo" className="h-10" />
+          <nav className="hidden md:flex space-x-8 font-medium">
+            {["Catalogo", "Home", "Perfil"].map((item) => (
+              <a
+                key={item}
+                href="#"
+                className="hover:text-green-600 transition-colors duration-300"
+              >
+                {item}
+              </a>
+            ))}
           </nav>
           <div className="flex items-center space-x-4">
             <input
@@ -49,21 +48,6 @@ const EscolherEndereco: React.FC = () => {
               placeholder="Buscar serviços..."
               className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             />
-            <button className="relative text-gray-600 hover:text-green-600 transition">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-2.3 2.3c-.6.6-.2 1.7.7 1.7H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-            </button>
           </div>
         </div>
       </header>
@@ -93,7 +77,7 @@ const EscolherEndereco: React.FC = () => {
       {/* Conteúdo principal */}
       <main className="flex-1 container mx-auto px-4 py-10">
         <h1 className="text-2xl font-semibold text-gray-800 text-center mb-8">
-          Selecione o endereço para entrega ou retirada
+          Selecione seu endereço para o serviço
         </h1>
 
         <div className="max-w-2xl mx-auto space-y-4">

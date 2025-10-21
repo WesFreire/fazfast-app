@@ -18,28 +18,17 @@ const fadeUp = {
 
 const PerfilProfissional: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
+    <div className="min-h-screen bg-gray-50 font-sans text-gray-800 overflow-x-hidden">
       {/* Header */}
-      <motion.header
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6 }}
-        className="bg-white shadow-md sticky top-0 z-50"
-      >
+      <header className="backdrop-blur-md bg-white/80 shadow-sm sticky top-0 z-50 transition">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <Image
-            src="/Images/FazFastLogo.png"
-            alt="FazFast Logo"
-            width={120}
-            height={40}
-            className="h-10 w-auto"
-          />
+          <img src="/Images/FazFastLogo.png" alt="FazFast Logo" className="h-10" />
           <nav className="hidden md:flex space-x-8 font-medium">
-            {["Home", "Sobre", "Contato", "Blog"].map((item) => (
+            {["Catalogo", "Home", "Perfil"].map((item) => (
               <a
                 key={item}
                 href="#"
-                className="hover:text-green-600 transition-colors duration-200"
+                className="hover:text-green-600 transition-colors duration-300"
               >
                 {item}
               </a>
@@ -49,26 +38,12 @@ const PerfilProfissional: React.FC = () => {
             <input
               type="text"
               placeholder="Buscar serviços..."
-              className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+              className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             />
-            <a href="#" className="relative text-gray-600 hover:text-green-600 transition">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-2.3 2.3c-.6.6-.2 1.7.7 1.7H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
-            </a>
           </div>
         </div>
-      </motion.header>
+      </header>
+
 
       <div className="w-full bg-white">
         {/* Breadcrumb */}
@@ -81,7 +56,7 @@ const PerfilProfissional: React.FC = () => {
         >
           <Link href="/" className="hover:text-green-600 transition-colors">Home</Link>
           <span>›</span>
-          <Link href="/menu" className="hover:text-green-600 transition-colors">Educação</Link>
+          <Link href="/catalogo" className="hover:text-green-600 transition-colors">Educação</Link>
           <span>›</span>
           <span className="text-gray-800 font-medium">Marcelo Pereira da Silva</span>
         </motion.div>

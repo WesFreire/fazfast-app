@@ -37,7 +37,7 @@ const FazFastHome: React.FC = () => {
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <img src="/Images/FazFastLogo.png" alt="FazFast Logo" className="h-10" />
           <nav className="hidden md:flex space-x-8 font-medium">
-            {["Home", "Sobre", "Contato", "Blog"].map((item) => (
+            {["Catalogo", "Home", "Perfil"].map((item) => (
               <a
                 key={item}
                 href="#"
