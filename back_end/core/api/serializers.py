@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from core.models import Usuario, Servico, PortfolioItem, Contrato, Avaliacao, Notificacao
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
 
 class UsuarioSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -23,7 +25,37 @@ class UsuarioSerializer(serializers.ModelSerializer):
         if password:
             instance.set_password(password)
         instance.save()
-        return instance
+        return 
+    
+
+
+UsuarioModel = get_user_model()  # garante compatibilidade com user customizado
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        validators=[validate_password],
+        style={'input_type': 'password'}
+    )
+    password2 = serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+        model = UsuarioModel
+        fields = ['username', 'email', 'password', 'password2']
+
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            raise serializers.ValidationError({"password": "As senhas não coincidem."})
+        return attrs
+
+    def create(self, validated_data):
+        validated_data.pop('password2')
+        password = validated_data.pop('password')
+        user = UsuarioModel(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
 
 
 class ServicoSerializer(serializers.ModelSerializer):
