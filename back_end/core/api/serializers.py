@@ -1,17 +1,28 @@
 from rest_framework import serializers
-from core.models import Usuario, Servico, PortfolioItem, Contrato, Avaliacao, Notificacao
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from core.models import (
+    Usuario,
+    Cliente,
+    Profissional,
+    Categoria,
+    Servico,
+    PortfolioItem,
+    Contrato,
+    Avaliacao,
+    Notificacao,
+)
+
 
 class UsuarioSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Usuario
         fields = "__all__"
 
     def create(self, validated_data):
-        password = validated_data.pop('password', None)
+        password = validated_data.pop("password", None)
         user = self.Meta.model(**validated_data)
         if password:
             user.set_password(password)
@@ -19,46 +30,89 @@ class UsuarioSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
-        password = validated_data.pop('password', None)
+        password = validated_data.pop("password", None)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         if password:
             instance.set_password(password)
         instance.save()
-        return 
-    
+        return instance 
 
 
-UsuarioModel = get_user_model()  # garante compatibilidade com user customizado
+UsuarioModel = get_user_model()
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         write_only=True,
         required=True,
         validators=[validate_password],
-        style={'input_type': 'password'}
+        style={"input_type": "password"},
     )
     password2 = serializers.CharField(write_only=True, required=True)
 
     class Meta:
         model = UsuarioModel
-        fields = ['username', 'email', 'password', 'password2']
+        fields = ["username", "email", "password", "password2"]
 
     def validate(self, attrs):
-        if attrs['password'] != attrs['password2']:
+        if attrs["password"] != attrs["password2"]:
             raise serializers.ValidationError({"password": "As senhas não coincidem."})
         return attrs
 
     def create(self, validated_data):
-        validated_data.pop('password2')
-        password = validated_data.pop('password')
+        validated_data.pop("password2")
+        password = validated_data.pop("password")
         user = UsuarioModel(**validated_data)
         user.set_password(password)
         user.save()
         return user
 
 
+class ClienteSerializer(serializers.ModelSerializer):
+    usuario = UsuarioSerializer(read_only=True)
+    usuario_id = serializers.PrimaryKeyRelatedField(
+        queryset=Usuario.objects.all(), source="usuario", write_only=True
+    )
+
+    class Meta:
+        model = Cliente
+        fields = ["id", "usuario", "usuario_id", "data_nascimento", "cpf", "preferencias"]
+
+
+class ProfissionalSerializer(serializers.ModelSerializer):
+    usuario = UsuarioSerializer(read_only=True)
+    usuario_id = serializers.PrimaryKeyRelatedField(
+        queryset=Usuario.objects.all(), source="usuario", write_only=True
+    )
+    especialidades = serializers.StringRelatedField(many=True, read_only=True)
+
+    class Meta:
+        model = Profissional
+        fields = [
+            "id",
+            "usuario",
+            "usuario_id",
+            "biografia",
+            "cnpj",
+            "experiencia_anos",
+            "avaliacao_media",
+            "especialidades",
+        ]
+
+
+class CategoriaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Categoria
+        fields = "__all__"
+
+
 class ServicoSerializer(serializers.ModelSerializer):
+    profissional = ProfissionalSerializer(read_only=True)
+    profissional_id = serializers.PrimaryKeyRelatedField(
+        queryset=Profissional.objects.all(), source="profissional", write_only=True
+    )
+
     class Meta:
         model = Servico
         fields = "__all__"
@@ -71,6 +125,15 @@ class PortfolioItemSerializer(serializers.ModelSerializer):
 
 
 class ContratoSerializer(serializers.ModelSerializer):
+    cliente = ClienteSerializer(read_only=True)
+    profissional = ProfissionalSerializer(read_only=True)
+    cliente_id = serializers.PrimaryKeyRelatedField(
+        queryset=Cliente.objects.all(), source="cliente", write_only=True
+    )
+    profissional_id = serializers.PrimaryKeyRelatedField(
+        queryset=Profissional.objects.all(), source="profissional", write_only=True
+    )
+
     class Meta:
         model = Contrato
         fields = "__all__"
