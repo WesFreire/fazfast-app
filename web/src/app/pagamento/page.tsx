@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, ChangeEvent } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 
@@ -114,7 +115,7 @@ const PagamentoPage: React.FC = () => {
     }
 
     setPagamentoConcluido(true);
-    setTimeout(() => router.push("/home"), 5000);
+    setTimeout(() => router.push("/"), 5000);
   };
 
   return (
@@ -161,25 +162,36 @@ const PagamentoPage: React.FC = () => {
       </AnimatePresence>
 
       {/* HEADER */}
-      <header className="backdrop-blur-md bg-white/80 shadow-sm sticky top-0 z-50">
+      <motion.header
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="backdrop-blur-md bg-white/90 shadow-lg sticky top-0 z-50"
+      >
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <img src="/Images/FazFastLogo.png" alt="FazFast Logo" className="h-10" />
+          <Link href="/">
+            <Image src="/Images/FazFastLogo.png" alt="FazFast Logo" width={160} height={40} className="h-10 w-auto" priority />
+          </Link>
           <nav className="hidden md:flex space-x-8 font-medium">
-            {["Catalogo", "Home", "Perfil"].map((item) => (
-              <a key={item} href="#" className="hover:text-green-600 transition-colors duration-300">
+            {["Home", "Catalogo", "Perfil"].map((item) => (
+              <Link
+                key={item}
+                href={`/${item.toLowerCase()}`}
+                className="text-gray-600 hover:text-green-600 transition-colors duration-300 border-b-2 border-transparent hover:border-green-600 pb-1"
+              >
                 {item}
-              </a>
+              </Link>
             ))}
           </nav>
           <div className="flex items-center space-x-4">
             <input
               type="text"
               placeholder="Buscar serviços..."
-              className="px-4 py-2 border rounded-md focus:ring-2 focus:ring-green-500 outline-none"
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 hidden md:block"
             />
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* PASSOS */}
       <div className="bg-white border-b py-4">

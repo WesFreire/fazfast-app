@@ -11,11 +11,13 @@ const fadeInUp = {
   visible: { opacity: 1, y: 0 },
 };
 
-const LoginPage: React.FC = () => {
+const CadastroPage: React.FC = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -25,8 +27,12 @@ const LoginPage: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulação de login (substitua por lógica real de autenticação)
-    console.log("Login:", { email: formData.email, password: formData.password });
+    if (formData.password !== formData.confirmPassword) {
+      alert("As senhas não coincidem!");
+      return;
+    }
+    // Simulação de cadastro (substitua por lógica real de registro)
+    console.log("Cadastro:", formData);
     router.push("/perfil");
   };
 
@@ -77,19 +83,38 @@ const LoginPage: React.FC = () => {
           <div className="md:w-1/2 p-10 bg-black text-white flex flex-col justify-center">
             <img src="/Images/FazFastLogo_Inv.png" alt="FazFast Logo" className="h-20 mb-15" />
             <h1 className="text-4xl font-bold mb-4 tracking-tight">
-              Bem-vindo de Volta!
+              Junte-se ao FazFast!
             </h1>
             <p className="text-base leading-relaxed max-w-md">
-              Entre para conectar-se com os melhores profissionais do Brasil e encontrar serviços incríveis.
+              Crie sua conta e comece a oferecer ou contratar serviços de forma rápida, segura e confiável!
             </p>
           </div>
 
           {/* Right Side - Form */}
           <div className="md:w-1/2 p-10 bg-white">
             <h2 className="text-3xl font-semibold text-gray-900 mb-8">
-              Login
+              Criar Conta
             </h2>
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Nome Completo
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="Seu nome completo"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition bg-gray-50 text-gray-800 placeholder-gray-400"
+                  required
+                />
+              </div>
+
               <div>
                 <label
                   htmlFor="email"
@@ -128,35 +153,45 @@ const LoginPage: React.FC = () => {
                 />
               </div>
 
+              <div>
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Confirmar Senha
+                </label>
+                <input
+                  type="password"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  placeholder="Confirme sua senha"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition bg-gray-50 text-gray-800 placeholder-gray-400"
+                  required
+                />
+              </div>
+
               <motion.button
                 type="submit"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.97 }}
                 className="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium text-lg shadow-sm"
               >
-                Entrar
+                Cadastrar
               </motion.button>
             </form>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
-                Ainda não tem uma conta?
+                Já tem uma conta?
                 <Link
-                  href="/cadastro"
+                  href="/login"
                   className="ml-2 text-green-600 hover:text-green-700 font-medium transition"
                 >
-                  Cadastre-se
+                  Faça login
                 </Link>
               </p>
-            </div>
-
-            <div className="mt-4 text-center">
-              <Link
-                href="/esqueci-senha"
-                className="text-sm text-gray-500 hover:text-green-600 transition"
-              >
-                Esqueceu sua senha?
-              </Link>
             </div>
           </div>
         </div>
@@ -227,4 +262,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
+export default CadastroPage;

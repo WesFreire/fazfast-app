@@ -1,61 +1,145 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 const DocumentoPage: React.FC = () => {
   const router = useRouter();
   const docRef = useRef<HTMLDivElement>(null);
+  const [userName, setUserName] = useState("Seu Nome Completo");
+  const [cpf, setCpf] = useState("XXX.XXX.XXX-XX");
+  const [city, setCity] = useState("Sua Cidade");
+  const [date] = useState(new Date().toLocaleDateString("pt-BR"));
+  const [isFormFilled, setIsFormFilled] = useState(false);
 
   const handleDownloadPDF = () => {
     const content = docRef.current;
     if (!content) return;
+
+    html2canvas(content, { scale: 2 }).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = 0;
+
+      pdf.addImage(imgData, "PNG", imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      pdf.save("termo_prestacao_servicos.pdf");
+    });
   };
 
   const handleProceed = () => {
-    router.push("/pagamento");
+    if (userName === "Seu Nome Completo" || cpf === "XXX.XXX.XXX-XX" || city === "Sua Cidade") {
+      alert("Por favor, preencha seus dados pessoais antes de prosseguir.");
+      return;
+    }
+    setIsFormFilled(true);
+    router.push("/");
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 font-sans">
-      {/* HEADER */}
-      <header className="bg-white shadow-md sticky top-0 z-50 backdrop-blur-md">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 font-sans text-gray-800 overflow-x-hidden">
+      {/* Header */}
+      <motion.header
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="backdrop-blur-md bg-white/90 shadow-lg sticky top-0 z-50"
+      >
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <img src="/Images/FazFastLogo.png" alt="FazFast Logo" className="h-10" />
+          <Link href="/">
+            <Image src="/Images/FazFastLogo.png" alt="FazFast Logo" width={160} height={40} className="h-10 w-auto" priority />
+          </Link>
           <nav className="hidden md:flex space-x-8 font-medium">
-            {["Catálogo", "Home", "Perfil"].map((item) => (
-              <a
+            {["Home", "Catalogo", "Perfil"].map((item) => (
+              <Link
                 key={item}
-                href="#"
-                className="hover:text-green-600 transition-colors duration-300"
+                href={`/${item.toLowerCase()}`}
+                className="text-gray-600 hover:text-green-600 transition-colors duration-300 border-b-2 border-transparent hover:border-green-600 pb-1"
               >
                 {item}
-              </a>
+              </Link>
             ))}
           </nav>
+          <div className="flex items-center space-x-4">
+            <input
+              type="text"
+              placeholder="Buscar serviços..."
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 hidden md:block"
+            />
+          </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* CONTEÚDO */}
       <main className="container mx-auto px-6 py-12">
         <motion.h1
-          className="text-3xl font-bold text-gray-900 mb-6 text-center"
+          className="text-4xl font-bold text-gray-900 mb-8 text-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
           Termo de Prestação de Serviços
         </motion.h1>
 
+        {/* Formulário para Dados Pessoais */}
+        <motion.div
+          className="bg-white shadow-md rounded-2xl p-6 mb-8 max-w-4xl mx-auto"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Preencha seus Dados</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+              <input
+                type="text"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+              <input
+                type="text"
+                value={cpf}
+                onChange={(e) => setCpf(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
+              <input
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+              />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Documento */}
         <motion.div
           ref={docRef}
           className="bg-white shadow-xl rounded-2xl p-8 leading-relaxed text-justify max-w-4xl mx-auto border border-gray-100"
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
         >
           <p className="mb-4">
-            Eu, <span className="font-semibold text-gray-900">[Nome do Contratante]</span>, portador(a) do CPF
-            <span className="font-semibold text-gray-900"> [XXX.XXX.XXX-XX]</span>, declaro estar ciente e de acordo com todos
+            Eu, <span className="font-semibold text-gray-900">{userName}</span>, portador(a) do CPF
+            <span className="font-semibold text-gray-900"> {cpf}</span>, declaro estar ciente e de acordo com todos
             os termos descritos neste documento, autorizando o profissional cadastrado na plataforma{" "}
             <span className="text-green-600 font-semibold">FazFast</span> a realizar os serviços solicitados.
           </p>
@@ -112,27 +196,32 @@ const DocumentoPage: React.FC = () => {
 
           <div className="mt-8 text-center">
             <p className="text-sm text-gray-600 italic mb-2">Local e Data:</p>
-            <p className="font-medium text-gray-800 mb-6">______________________, ____ / ____ / ______</p>
+            <p className="font-medium text-gray-800 mb-6">{city}, {date}</p>
             <p className="font-semibold text-gray-900 mb-2">Assinatura do Contratante:</p>
             <div className="border-b border-gray-400 w-64 mx-auto"></div>
           </div>
         </motion.div>
 
         {/* BOTÕES */}
-        <div className="flex justify-center mt-10 space-x-6">
+        <motion.div
+          className="flex justify-center mt-10 space-x-6"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+        >
           <button
             onClick={handleDownloadPDF}
-            className="bg-white border border-gray-900 text-gray-900 px-6 py-3 rounded-xl font-medium hover:bg-gray-100 transition"
+            className="bg-white border border-gray-900 text-gray-900 px-6 py-3 rounded-xl font-medium hover:bg-gray-100 transition shadow-md"
           >
             Baixar em PDF
           </button>
           <button
             onClick={handleProceed}
-            className="bg-gray-900 text-white px-8 py-3 rounded-xl font-medium hover:bg-gray-800 transition"
+            className="bg-gray-900 text-white px-8 py-3 rounded-xl font-medium hover:bg-gray-800 transition shadow-md"
           >
-            Prosseguir
+            Prosseguir para Pagamento
           </button>
-        </div>
+        </motion.div>
       </main>
 
       {/* FOOTER */}
