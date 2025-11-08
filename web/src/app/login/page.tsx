@@ -32,38 +32,6 @@ const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 font-sans text-gray-800 overflow-x-hidden">
-      {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="backdrop-blur-md bg-white/90 shadow-lg sticky top-0 z-50"
-      >
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/">
-            <Image src="/Images/FazFastLogo.png" alt="FazFast Logo" width={160} height={40} className="h-10 w-auto" priority />
-          </Link>
-          <nav className="hidden md:flex space-x-8 font-medium">
-            {["Home", "Catalogo", "Perfil"].map((item) => (
-              <Link
-                key={item}
-                href={`/${item.toLowerCase()}`}
-                className="text-gray-600 hover:text-green-600 transition-colors duration-300 border-b-2 border-transparent hover:border-green-600 pb-1"
-              >
-                {item}
-              </Link>
-            ))}
-          </nav>
-          <div className="flex items-center space-x-4">
-            <input
-              type="text"
-              placeholder="Buscar serviços..."
-              className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 hidden md:block"
-            />
-          </div>
-        </div>
-      </motion.header>
-
       {/* Main Container */}
       <motion.div
         variants={fadeInUp}
@@ -161,68 +129,6 @@ const LoginPage: React.FC = () => {
           </div>
         </div>
       </motion.div>
-
-      {/* Footer */}
-      <footer className="bg-black text-gray-300 py-12 mt-12">
-        <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12">
-          <div>
-            <img
-              src="/Images/FazFastLogo_Inv.png"
-              alt="FazFast Logo"
-              className="h-12 mb-4"
-            />
-            <p className="text-sm leading-relaxed">
-              Plataforma de serviços sob demanda, conectando clientes e
-              profissionais em todo o Brasil com qualidade e confiança.
-            </p>
-          </div>
-          <nav>
-            <h4 className="font-semibold mb-4 text-white">
-              Assistência ao Cliente
-            </h4>
-            <ul className="space-y-2 text-sm">
-              {["Buscar", "Recomendado", "Categorias", "Perguntas Frequentes", "Termos de Uso"].map((link) => (
-                <li key={link}>
-                  <a
-                    href="#"
-                    className="hover:text-green-600 transition-colors duration-300"
-                  >
-                    {link}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-          <div>
-            <h4 className="font-semibold mb-4 text-white">Conecte-se</h4>
-            <div className="flex space-x-4">
-              {[
-                { alt: "X", img: "/Images/X_Logo.png" },
-                { alt: "TikTok", img: "/Images/TikTok_Logo.png" },
-                { alt: "Instagram", img: "/Images/Instagram_Logo.png" },
-              ].map((social) => (
-                <a
-                  key={social.alt}
-                  href="#"
-                  aria-label={social.alt}
-                  className="transition-transform duration-300 hover:scale-110"
-                >
-                  <img
-                    src={social.img}
-                    alt={social.alt}
-                    className="h-8 w-8 object-contain"
-                  />
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-        <div className="mt-10 border-t border-gray-800 pt-6 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()}{" "}
-          <span className="text-white font-semibold">FazFast</span>. Todos os
-          direitos reservados.
-        </div>
-      </footer>
     </div>
   );
 };
