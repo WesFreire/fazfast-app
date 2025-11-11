@@ -42,6 +42,8 @@ class UsuarioSerializer(serializers.ModelSerializer):
 UsuarioModel = get_user_model()
 
 
+# serializers.py
+
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         write_only=True,
@@ -50,10 +52,14 @@ class RegisterSerializer(serializers.ModelSerializer):
         style={"input_type": "password"},
     )
     password2 = serializers.CharField(write_only=True, required=True)
+    papel = serializers.ChoiceField(
+        choices=[("cliente", "Cliente"), ("profissional", "Profissional")],
+        write_only=True
+    )
 
     class Meta:
         model = UsuarioModel
-        fields = ["username", "email", "password", "password2"]
+        fields = ["username", "email", "password", "password2", "papel"]
 
     def validate(self, attrs):
         if attrs["password"] != attrs["password2"]:
@@ -61,11 +67,24 @@ class RegisterSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        papel = validated_data.pop("papel")
         validated_data.pop("password2")
         password = validated_data.pop("password")
+
         user = UsuarioModel(**validated_data)
         user.set_password(password)
         user.save()
+
+        # Cria o modelo relacionado automaticamente
+        if papel == "cliente":
+            Cliente.objects.create(usuario=user)
+        elif papel == "profissional":
+            Profissional.objects.create(usuario=user)
+            user.pode_prestar = True  # marca que ele pode prestar serviços
+            user.save(update_fields=["pode_prestar"])
+
+        user.papel_ativo = papel
+        user.save(update_fields=["papel_ativo"])
         return user
 
 

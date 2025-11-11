@@ -1,5 +1,6 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated, AllowAny
+
 from core.models import (
     Usuario,
     Cliente,
@@ -12,6 +13,7 @@ from core.models import (
     Notificacao,
 )
 from .serializers import (
+    RegisterSerializer,
     UsuarioSerializer,
     ClienteSerializer,
     ProfissionalSerializer,
@@ -41,6 +43,9 @@ class ProfissionalViewSet(viewsets.ModelViewSet):
     serializer_class = ProfissionalSerializer
     permission_classes = [IsAuthenticated]
 
+class RegisterView(generics.CreateAPIView):
+    serializer_class = RegisterSerializer
+    permission_classes = [AllowAny]
 
 class CategoriaViewSet(viewsets.ModelViewSet):
     queryset = Categoria.objects.all().order_by("id")
