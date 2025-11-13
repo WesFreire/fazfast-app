@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { getUserData } from "@/services/auth";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
@@ -13,22 +13,81 @@ const fadeInUp = {
 
 const LoginPage: React.FC = () => {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [error, setError] = useState<string | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Simulação de login (substitua por lógica real de autenticação)
-    console.log("Login:", { email: formData.email, password: formData.password });
-    router.push("/perfil");
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setError(null);
+
+  try {
+    console.log("➡️ Iniciando login com:", formData);
+
+    const response = await fetch("http://localhost:8000/api/token/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("❌ Erro no login:", errorData);
+      setError(errorData.detail || "E-mail ou senha incorretos.");
+      return;
+    }
+
+    const data = await response.json();
+    console.log("✅ Login bem-sucedido:", data);
+
+    // Salva tokens em cookies
+    document.cookie = `access=${data.access}; path=/; SameSite=Lax;`;
+    document.cookie = `refresh=${data.refresh}; path=/; SameSite=Lax;`;
+
+    // Busca os dados do usuário
+    const profileResponse = await fetch("http://localhost:8000/api/me/", {
+      headers: { Authorization: `Bearer ${data.access}` },
+    });
+
+    if (!profileResponse.ok) {
+      console.error("❌ Erro ao buscar perfil:", profileResponse.status);
+      setError("Erro ao carregar dados do usuário.");
+      return;
+    }
+
+    const userData = await profileResponse.json();
+    console.log("👤 Dados do usuário:", userData);
+
+    // Redireciona conforme o papel do usuário
+    if (userData.papel_ativo === "cliente") {
+      router.push("/perfilusuario");
+      return;
+    }
+
+    if (userData.papel_ativo === "profissional") {
+      router.push("/perfilprofissional");
+      return;
+    }
+
+// Caso padrão
+console.log("➡️ Redirecionando para /perfil");
+router.push("/perfil");
+
+
+  } catch (err) {
+    console.error("⚠️ Erro de conexão:", err);
+    setError("Erro ao conectar ao servidor.");
+  }
+};
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 font-sans text-gray-800 overflow-x-hidden">
