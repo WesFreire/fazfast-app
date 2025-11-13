@@ -53,7 +53,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     )
     password2 = serializers.CharField(write_only=True, required=True)
     papel = serializers.ChoiceField(
-        choices=[("cliente", "Cliente"), ("profissional", "Profissional")],
+        choices=[("cliente", "Cliente"), ("prestador", "Prestador")],
         write_only=True
     )
 

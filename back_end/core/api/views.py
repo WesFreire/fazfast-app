@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
-from .serializers import RegisterSerializer
+from .serializers import RegisterSerializer, UsuarioSerializer
 
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
@@ -16,3 +16,10 @@ class RegisterView(APIView):
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class UserProfileView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        serializer = UsuarioSerializer(user)
+        return Response(serializer.data)

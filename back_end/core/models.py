@@ -11,7 +11,7 @@ class Usuario(AbstractUser):
     pode_prestar = models.BooleanField(default=False)
     papel_ativo = models.CharField(
         max_length=20,
-        choices=(("cliente", "Cliente"), ("prestador", "Prestador")),
+        choices=(("cliente", "Cliente"), ("profissional", "Profissional")),
         default="cliente",
         help_text="Define qual papel o usuário está usando atualmente na interface."
     )
