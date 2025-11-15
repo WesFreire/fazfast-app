@@ -46,7 +46,7 @@ const DocumentoPage: React.FC = () => {
     router.push("/");
   };
 
-  return (
+return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 font-sans text-gray-800 overflow-x-hidden">
       {/* Header */}
       <motion.header
@@ -59,6 +59,7 @@ const DocumentoPage: React.FC = () => {
           <Link href="/">
             <Image src="/Images/FazFastLogo.png" alt="FazFast Logo" width={160} height={40} className="h-10 w-auto" priority />
           </Link>
+
           <nav className="hidden md:flex space-x-8 font-medium">
             {["Home", "Catalogo", "Perfil"].map((item) => (
               <Link
@@ -70,16 +71,33 @@ const DocumentoPage: React.FC = () => {
               </Link>
             ))}
           </nav>
+
           <div className="flex items-center space-x-4">
             <input
               type="text"
               placeholder="Buscar serviços..."
               className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 hidden md:block"
             />
+
+            {/* Login Icon */}
+            <Link
+              href="/login"
+              className="p-2 rounded-xl hover:bg-green-100 transition-all"
+            >
+              <Image src="/Images/login.png" alt="Login" width={28} height={28} className="opacity-80 hover:opacity-100 transition" />
+            </Link>
+
+            {/* Logout Icon */}
+            <button
+              onClick={() => console.log("Logout clicked")}
+              className="p-2 rounded-xl hover:bg-red-100 transition-all"
+            >
+              <Image src="/Images/logout.png" alt="Logout" width={28} height={28} className="opacity-80 hover:opacity-100 transition" />
+            </button>
           </div>
         </div>
       </motion.header>
-
+      
       {/* CONTEÚDO */}
       <main className="container mx-auto px-6 py-12">
         <motion.h1
