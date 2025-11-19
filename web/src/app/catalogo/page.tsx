@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 
 type Profissional = {
   id: number;
@@ -49,7 +50,7 @@ const mockProfissionais: Profissional[] = [
   },
 ];
 
-// ✅ Hook de scroll reveal (sem libs externas)
+
 function useScrollReveal() {
   const controls = useAnimation();
   const ref = useRef<HTMLDivElement | null>(null);
@@ -110,7 +111,15 @@ const ProfessionalCard: React.FC<{ profissional: Profissional }> = ({ profission
 };
 
 const Menu: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const searchFromHome = searchParams.get("search") || "";
+
+  const [searchTerm, setSearchTerm] = useState(searchFromHome);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [filtros, setFiltros] = useState({
     materia: "",
     anos: [] as string[],
@@ -137,18 +146,24 @@ const Menu: React.FC = () => {
     .filter((p) =>
       filtros.materia === "" || p.materia.toLowerCase().includes(filtros.materia.toLowerCase())
     )
-    .filter((p) => (filtros.anos.length ? filtros.anos.some((a) => p.anos.includes(a)) : true))
-    .filter((p) => (filtros.formacao.length ? filtros.formacao.includes(p.formacao) : true))
-    .filter((p) => (filtros.genero.length ? filtros.genero.includes(p.genero) : true))
+    .filter((p) =>
+      filtros.anos.length ? filtros.anos.some((a) => p.anos.includes(a)) : true
+    )
+    .filter((p) =>
+      filtros.formacao.length ? filtros.formacao.includes(p.formacao) : true
+    )
+    .filter((p) =>
+      filtros.genero.length ? filtros.genero.includes(p.genero) : true
+    )
     .sort((a, b) => {
       if (filtros.ordenacao === "avaliacao") return b.avaliacao - a.avaliacao;
       if (filtros.ordenacao === "nome") return a.nome.localeCompare(b.nome);
       return 0;
     });
 
- return (
+  return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 font-sans text-gray-800 overflow-x-hidden">
-      {/* Header */}
+
       <motion.header
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -157,42 +172,56 @@ const Menu: React.FC = () => {
       >
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/">
-            <Image src="/Images/FazFastLogo.png" alt="FazFast Logo" width={160} height={40} className="h-10 w-auto" priority />
+            <Image src="/Images/FazFastLogo.png" alt="FazFast Logo" width={160} height={40} className="h-10 w-auto" priority/>
           </Link>
 
           <nav className="hidden md:flex space-x-8 font-medium">
-            {["Home", "Catalogo", "Perfil"].map((item) => (
-              <Link
-                key={item}
-                href={`/${item.toLowerCase()}`}
-                className="text-gray-600 hover:text-green-600 transition-colors duration-300 border-b-2 border-transparent hover:border-green-600 pb-1"
-              >
-                {item}
-              </Link>
-            ))}
+            <Link
+              href="/"
+              className="text-gray-600 hover:text-green-600 transition-colors duration-300 border-b-2 border-transparent hover:border-green-600 pb-1"
+            >
+              Home
+            </Link>
+
+            <Link
+              href="/catalogo"
+              className="text-gray-600 hover:text-green-600 transition-colors duration-300 border-b-2 border-transparent hover:border-green-600 pb-1"
+            >
+              Catalogo
+            </Link>
+
+            <Link
+              href="/perfilusuario"
+              className="text-gray-600 hover:text-green-600 transition-colors duration-300 border-b-2 border-transparent hover:border-green-600 pb-1"
+            >
+              Perfil
+            </Link>
           </nav>
 
           <div className="flex items-center space-x-4">
             <input
               type="text"
               placeholder="Buscar serviços..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  if (searchTerm.trim() === "") {
+                    window.history.replaceState(null, "", "/catalogo");
+                  } else {
+                    window.history.replaceState(null, "", `/catalogo?search=${searchTerm}`);
+                  }
+                }
+              }}
               className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 hidden md:block"
             />
 
-            {/* Login Icon */}
-            <Link
-              href="/login"
-              className="p-2 rounded-xl hover:bg-green-100 transition-all"
-            >
-              <Image src="/Images/login.png" alt="Login" width={28} height={28} className="opacity-80 hover:opacity-100 transition" />
+            <Link href="/login" className="p-2 rounded-xl hover:bg-green-100 transition-all">
+              <Image src="/Images/login.png" alt="Login" width={28} height={28} />
             </Link>
 
-            {/* Logout Icon */}
-            <button
-              onClick={() => console.log("Logout clicked")}
-              className="p-2 rounded-xl hover:bg-red-100 transition-all"
-            >
-              <Image src="/Images/logout.png" alt="Logout" width={28} height={28} className="opacity-80 hover:opacity-100 transition" />
+            <button className="p-2 rounded-xl hover:bg-red-100 transition-all">
+              <Image src="/Images/logout.png" alt="Logout" width={28} height={28} />
             </button>
           </div>
         </div>
@@ -212,9 +241,10 @@ const Menu: React.FC = () => {
         <p className="text-gray-500 mt-1 text-sm">Use os filtros ao lado para refinar sua busca.</p>
       </motion.div>
 
-      {/* Conteúdo */}
+      {/* Layout */}
       <div className="container mx-auto px-6 pb-12 grid grid-cols-1 md:grid-cols-4 gap-8">
-        {/* Sidebar */}
+        
+        {/* Sidebar Filtros */}
         <aside className="md:col-span-1 bg-white p-5 rounded-xl shadow h-fit sticky top-24 space-y-5">
           <div>
             <h4 className="font-semibold mb-2">Matéria</h4>
@@ -238,8 +268,8 @@ const Menu: React.FC = () => {
                 <label key={val} className="flex items-center space-x-2 text-sm mb-1">
                   <input
                     type="checkbox"
-                    checked={filtros[section.key as keyof typeof filtros].includes(val)}
-                    onChange={() => toggleFiltroArray(section.key as "anos" | "formacao" | "genero", val)}
+                    checked={(filtros as any)[section.key].includes(val)}
+                    onChange={() => toggleFiltroArray(section.key as any, val)}
                   />
                   <span>{val}</span>
                 </label>
@@ -248,12 +278,13 @@ const Menu: React.FC = () => {
           ))}
         </aside>
 
-        {/* Grid de cards com scroll reveal */}
+        {/* Conteúdo */}
         <main className="md:col-span-3">
           <div className="flex justify-between items-center mb-6">
             <p className="text-sm text-gray-600">
               {profissionaisFiltrados.length} profissionais encontrados
             </p>
+
             <select
               value={filtros.ordenacao}
               onChange={(e) => setFiltros({ ...filtros, ordenacao: e.target.value })}
@@ -278,23 +309,20 @@ const Menu: React.FC = () => {
           <div>
             <img src="/Images/FazFastLogo_Inv.png" alt="FazFast Logo" className="h-12 mb-4" />
             <p className="text-sm leading-relaxed">
-              Plataforma de serviços sob demanda, conectando clientes e profissionais em todo o
-              Brasil com qualidade e confiança.
+              Plataforma de serviços sob demanda, conectando clientes e profissionais em todo o Brasil com qualidade e confiança.
             </p>
           </div>
 
           <nav>
             <h4 className="font-semibold mb-4 text-white">Assistência ao Cliente</h4>
             <ul className="space-y-2 text-sm">
-              {["Buscar", "Recomendado", "Categorias", "Perguntas Frequentes", "Termos de Uso"].map(
-                (link) => (
-                  <li key={link}>
-                    <a href="#" className="hover:text-green-600 transition-colors duration-200">
-                      {link}
-                    </a>
-                  </li>
-                )
-              )}
+              {["Buscar", "Recomendado", "Categorias", "Perguntas Frequentes", "Termos de Uso"].map((link) => (
+                <li key={link}>
+                  <a href="#" className="hover:text-green-600 transition-colors duration-200">
+                    {link}
+                  </a>
+                </li>
+              ))}
             </ul>
           </nav>
 
@@ -315,6 +343,7 @@ const Menu: React.FC = () => {
           <span className="text-white font-semibold">FazFast</span>. Todos os direitos reservados.
         </div>
       </footer>
+
     </div>
   );
 };

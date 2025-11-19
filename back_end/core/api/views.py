@@ -2,6 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 from .serializers import RegisterSerializer, UsuarioSerializer
+from rest_framework.decorators import api_view
+from core.models import Profissional
 
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]

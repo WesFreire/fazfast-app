@@ -101,8 +101,9 @@ const PerfilUsuario: React.FC = () => {
     return <span className={`px-3 py-1 text-xs font-medium rounded-full ${styles[status] || "bg-gray-100 text-gray-700"}`}>{status}</span>;
   };
 
-return (
+  return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 font-sans text-gray-800 overflow-x-hidden">
+
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -50 }}
@@ -111,20 +112,34 @@ return (
         className="backdrop-blur-md bg-white/90 shadow-lg sticky top-0 z-50"
       >
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+
           <Link href="/">
             <Image src="/Images/FazFastLogo.png" alt="FazFast Logo" width={160} height={40} className="h-10 w-auto" priority />
           </Link>
 
           <nav className="hidden md:flex space-x-8 font-medium">
-            {["Home", "Catalogo", "Perfil"].map((item) => (
-              <Link
-                key={item}
-                href={`/${item.toLowerCase()}`}
-                className="text-gray-600 hover:text-green-600 transition-colors duration-300 border-b-2 border-transparent hover:border-green-600 pb-1"
-              >
-                {item}
-              </Link>
-            ))}
+
+            <Link
+              href="/"
+              className="text-gray-600 hover:text-green-600 transition-colors duration-300 border-b-2 border-transparent hover:border-green-600 pb-1"
+            >
+              Home
+            </Link>
+
+            <Link
+              href="/catalogo"
+              className="text-gray-600 hover:text-green-600 transition-colors duration-300 border-b-2 border-transparent hover:border-green-600 pb-1"
+            >
+              Catalogo
+            </Link>
+
+            <Link
+              href="/perfilusuario"
+              className="text-gray-600 hover:text-green-600 transition-colors duration-300 border-b-2 border-transparent hover:border-green-600 pb-1"
+            >
+              Perfil
+            </Link>
+
           </nav>
 
           <div className="flex items-center space-x-4">
@@ -134,28 +149,22 @@ return (
               className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 hidden md:block"
             />
 
-            {/* Login Icon */}
-            <Link
-              href="/login"
-              className="p-2 rounded-xl hover:bg-green-100 transition-all"
-            >
+            <Link href="/login" className="p-2 rounded-xl hover:bg-green-100 transition-all">
               <Image src="/Images/login.png" alt="Login" width={28} height={28} className="opacity-80 hover:opacity-100 transition" />
             </Link>
 
-            {/* Logout Icon */}
-            <button
-              onClick={() => console.log("Logout clicked")}
-              className="p-2 rounded-xl hover:bg-red-100 transition-all"
-            >
+            <button onClick={() => console.log("Logout clicked")} className="p-2 rounded-xl hover:bg-red-100 transition-all">
               <Image src="/Images/logout.png" alt="Logout" width={28} height={28} className="opacity-80 hover:opacity-100 transition" />
             </button>
           </div>
+
         </div>
       </motion.header>
 
-      {/* Main Content */}
+      {/* Conteúdo */}
       <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="max-w-7xl mx-auto px-6 py-12">
-        {/* Switch to Professional Profile */}
+
+        {/* Ver perfil profissional */}
         <motion.button
           variants={buttonVariants}
           whileHover="hover"
@@ -166,10 +175,11 @@ return (
           Ver Perfil Profissional
         </motion.button>
 
-        {/* Perfil do Cliente */}
+        {/* Perfil */}
         <motion.div variants={cardVariants} className="bg-white rounded-3xl shadow-xl p-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-3xl font-bold text-gray-900">Perfil do Cliente</h2>
+
             <motion.button
               onClick={() => setEditMode(!editMode)}
               whileHover={{ scale: 1.1 }}
@@ -180,44 +190,86 @@ return (
               </svg>
             </motion.button>
           </div>
+
           <p className="text-gray-600 mb-8">Gerencie suas informações pessoais e configurações.</p>
 
           {editMode ? (
             <form onSubmit={handleProfileUpdate} className="space-y-6">
+
               <div className="flex justify-center mb-4">
                 <div className="relative h-32 w-32 rounded-full overflow-hidden shadow-lg border-4 border-green-100">
                   <Image src={formData.profileImage} alt="Foto de Perfil" fill className="object-cover" />
                 </div>
               </div>
+
               <div className="text-center mb-4">
                 <label htmlFor="profileImage" className="cursor-pointer text-green-600 hover:text-green-700 font-medium">
                   Alterar Foto
                 </label>
                 <input id="profileImage" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
-                <input name="name" value={formData.name} onChange={handleInputChange} className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition bg-gray-50 ${errors.name ? "border-red-500" : "border-gray-300"}`} required />
+                <input
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition bg-gray-50 ${
+                    errors.name ? "border-red-500" : "border-gray-300"
+                  }`}
+                  required
+                />
                 {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
-                <input name="email" type="email" value={formData.email} onChange={handleInputChange} className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition bg-gray-50 ${errors.email ? "border-red-500" : "border-gray-300"}`} required />
+                <input
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition bg-gray-50 ${
+                    errors.email ? "border-red-500" : "border-gray-300"
+                  }`}
+                  required
+                />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Nova Senha</label>
-                  <input name="password" type="password" value={formData.password} onChange={handleInputChange} className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition bg-gray-50 ${errors.password ? "border-red-500" : "border-gray-300"}`} />
+                  <input
+                    name="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition bg-gray-50 ${
+                      errors.password ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
                   {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
                 </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar Senha</label>
-                  <input name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleInputChange} className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition bg-gray-50 ${errors.confirmPassword ? "border-red-500" : "border-gray-300"}`} />
+                  <input
+                    name="confirmPassword"
+                    type="password"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition bg-gray-50 ${
+                      errors.confirmPassword ? "border-red-500" : "border-gray-300"
+                    }`}
+                  />
                   {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
                 </div>
               </div>
+
               {errors.submit && <p className="text-red-500 text-sm text-center">{errors.submit}</p>}
+
               <motion.button
                 variants={buttonVariants}
                 whileHover="hover"
@@ -228,6 +280,7 @@ return (
               >
                 {isSubmitting ? "Salvando..." : "Salvar Alterações"}
               </motion.button>
+
             </form>
           ) : (
             <div className="text-center space-y-4">
@@ -238,16 +291,18 @@ return (
               <p className="text-gray-600">{formData.email}</p>
             </div>
           )}
+
         </motion.div>
 
-        {/* Histórico de Pedidos */}
-        <motion.div variants={cardVariants} className="bg-white rounded-3xl shadow-xl p-8">
+        {/* Histórico */}
+        <motion.div variants={cardVariants} className="bg-white rounded-3xl shadow-xl p-8 mt-12">
           <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
             <svg className="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             Histórico de Pedidos
           </h3>
+
           <div className="space-y-4">
             {orders.map((order) => (
               <motion.div
@@ -264,20 +319,25 @@ return (
                 </div>
               </motion.div>
             ))}
+
             {orders.length === 0 && <p className="text-center text-gray-500">Nenhum pedido encontrado.</p>}
           </div>
+
         </motion.div>
+
       </motion.div>
 
       {/* Footer */}
       <footer className="bg-black text-gray-300 py-12 mt-auto">
         <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12">
+
           <div>
             <Image src="/Images/FazFastLogo_Inv.png" alt="FazFast Logo" width={160} height={40} className="h-12 mb-4" />
             <p className="text-sm leading-relaxed">
               Plataforma de serviços sob demanda, conectando clientes e profissionais em todo o Brasil com qualidade e confiança.
             </p>
           </div>
+
           <nav>
             <h4 className="font-semibold mb-4 text-white">Assistência ao Cliente</h4>
             <ul className="space-y-2 text-sm">
@@ -290,35 +350,24 @@ return (
               ))}
             </ul>
           </nav>
+
           <div>
             <h4 className="font-semibold mb-4 text-white">Conecte-se</h4>
             <div className="flex space-x-4">
-              {[
-                { alt: "X", img: "/Images/X_Logo.png" },
-                { alt: "TikTok", img: "/Images/TikTok_Logo.png" },
-                { alt: "Instagram", img: "/Images/Instagram_Logo.png" },
-              ].map((social) => (
-                <a
-                  key={social.alt}
-                  href="#"
-                  aria-label={social.alt}
-                  className="transition-transform duration-300 hover:scale-110"
-                >
-                  <Image
-                    src={social.img}
-                    alt={social.alt}
-                    width={32}
-                    height={32}
-                    className="h-8 w-8 object-contain"
-                  />
+              {[{ alt: "X", img: "/Images/X_Logo.png" }, { alt: "TikTok", img: "/Images/TikTok_Logo.png" }, { alt: "Instagram", img: "/Images/Instagram_Logo.png" }].map((social) => (
+                <a key={social.alt} href="#" className="transition-transform duration-300 hover:scale-110">
+                  <Image src={social.img} alt={social.alt} width={32} height={32} className="h-8 w-8 object-contain" />
                 </a>
               ))}
             </div>
           </div>
+
         </div>
+
         <div className="mt-10 border-t border-gray-800 pt-6 text-center text-sm text-gray-500">
           © {new Date().getFullYear()} <span className="text-white font-semibold">FazFast</span>. Todos os direitos reservados.
         </div>
+
       </footer>
     </div>
   );

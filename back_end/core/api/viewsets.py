@@ -2,7 +2,6 @@ from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .serializers import ProfissionalHomeSerializer
 
 from core.models import (
     Usuario,
@@ -50,23 +49,6 @@ class ProfissionalViewSet(viewsets.ModelViewSet):
     serializer_class = ProfissionalSerializer
     permission_classes = [AllowAny]
 
-    @action(detail=False, methods=["get"])
-    def destaques(self, request):
-        profissionais = Profissional.objects.order_by("-avaliacao_media")[:10]
-        serializer = ProfissionalHomeSerializer(profissionais, many=True)
-        return Response(serializer.data)
-
-    @action(detail=False, methods=["get"])
-    def novos(self, request):
-        profissionais = Profissional.objects.order_by("-usuario__date_joined")[:10]
-        serializer = ProfissionalHomeSerializer(profissionais, many=True)
-        return Response(serializer.data)
-
-    @action(detail=False, methods=["get"])
-    def populares(self, request):
-        profissionais = Profissional.objects.order_by("-avaliacao_media")[:10]
-        serializer = ProfissionalHomeSerializer(profissionais, many=True)
-        return Response(serializer.data)
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer

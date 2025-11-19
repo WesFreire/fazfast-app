@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 
 
 class Usuario(AbstractUser):
@@ -40,6 +41,8 @@ class Profissional(models.Model):
     experiencia_anos = models.PositiveSmallIntegerField(default=0)
     especialidades = models.ManyToManyField("Categoria", blank=True, related_name="profissionais")
     avaliacao_media = models.FloatField(default=0.0)
+    data_criacao = models.DateTimeField(default=timezone.now)
+    total_servicos = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"Profissional: {self.usuario.get_full_name() or self.usuario.email}"

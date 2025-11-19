@@ -42,8 +42,6 @@ class UsuarioSerializer(serializers.ModelSerializer):
 UsuarioModel = get_user_model()
 
 
-# serializers.py
-
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         write_only=True,
@@ -75,12 +73,11 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
 
-        # Cria o modelo relacionado automaticamente
         if papel == "cliente":
             Cliente.objects.create(usuario=user)
         elif papel == "profissional":
             Profissional.objects.create(usuario=user)
-            user.pode_prestar = True  # marca que ele pode prestar serviços
+            user.pode_prestar = True
             user.save(update_fields=["pode_prestar"])
 
         user.papel_ativo = papel
@@ -117,6 +114,8 @@ class ProfissionalSerializer(serializers.ModelSerializer):
             "experiencia_anos",
             "avaliacao_media",
             "especialidades",
+            "data_criacao",
+            "total_servicos",
         ]
 
 
@@ -173,25 +172,3 @@ class NotificacaoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notificacao
         fields = "__all__"
-
-
-class ProfissionalHomeSerializer(serializers.ModelSerializer):
-    nome = serializers.SerializerMethodField()
-    foto = serializers.ImageField(source="usuario.foto_perfil", read_only=True)
-    especialidades = serializers.SerializerMethodField()
-    preco_minimo = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Profissional
-        fields = [
-            "id",
-            "nome",
-            "foto",
-            "especialidades",
-            "avaliacao_media",
-            "preco_minimo",
-        ]
-
-    def get_nome(self, obj):
-        nome = obj.usuario.get_full_name()
-        return nome if nome.strip() else obj.usuario.username
