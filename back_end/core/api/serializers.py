@@ -173,3 +173,25 @@ class NotificacaoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notificacao
         fields = "__all__"
+
+
+class ProfissionalHomeSerializer(serializers.ModelSerializer):
+    nome = serializers.SerializerMethodField()
+    foto = serializers.ImageField(source="usuario.foto_perfil", read_only=True)
+    especialidades = serializers.SerializerMethodField()
+    preco_minimo = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Profissional
+        fields = [
+            "id",
+            "nome",
+            "foto",
+            "especialidades",
+            "avaliacao_media",
+            "preco_minimo",
+        ]
+
+    def get_nome(self, obj):
+        nome = obj.usuario.get_full_name()
+        return nome if nome.strip() else obj.usuario.username

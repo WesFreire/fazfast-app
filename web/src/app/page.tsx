@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
@@ -21,7 +21,8 @@ const staggerContainer = {
 
 const FazFastHome: React.FC = () => {
   const sliderRef = useRef<HTMLDivElement>(null);
-
+  const [profissionais, setProfissionais] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const scroll = (direction: "left" | "right") => {
     if (sliderRef.current) {
       const scrollAmount = 200;
@@ -32,7 +33,23 @@ const FazFastHome: React.FC = () => {
     }
   };
 
-return (
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/profissionais/");
+        const data = await res.json();
+        setProfissionais(data);
+      } catch (err) {
+        console.error("Erro ao carregar profissionais:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 font-sans text-gray-800 overflow-x-hidden">
       {/* Header */}
       <motion.header
@@ -65,19 +82,11 @@ return (
               className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-gray-50 hidden md:block"
             />
 
-            {/* Login Icon */}
-            <Link
-              href="/login"
-              className="p-2 rounded-xl hover:bg-green-100 transition-all"
-            >
+            <Link href="/login" className="p-2 rounded-xl hover:bg-green-100 transition-all">
               <Image src="/Images/login.png" alt="Login" width={28} height={28} className="opacity-80 hover:opacity-100 transition" />
             </Link>
 
-            {/* Logout Icon */}
-            <button
-              onClick={() => console.log("Logout clicked")}
-              className="p-2 rounded-xl hover:bg-red-100 transition-all"
-            >
+            <button onClick={() => console.log("Logout clicked")} className="p-2 rounded-xl hover:bg-red-100 transition-all">
               <Image src="/Images/logout.png" alt="Logout" width={28} height={28} className="opacity-80 hover:opacity-100 transition" />
             </button>
           </div>
@@ -106,16 +115,18 @@ return (
             Simplesmente Rápido: Onde Suas Necessidades Ganham Vida!
           </h1>
           <p className="max-w-2xl mx-auto mb-6 text-lg">
-            Conectamos você aos melhores profissionais do Brasil para todos os
-            tipos de serviços.
+            Conectamos você aos melhores profissionais do Brasil para todos os tipos de serviços.
           </p>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.97 }}
-            className="bg-green-600 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-green-700 transition"
-          >
-            Explorar Serviços
-          </motion.button>
+
+          <Link href="/catalogo">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.97 }}
+              className="bg-green-600 text-white px-8 py-3 rounded-lg shadow-lg hover:bg-green-700 transition inline-block cursor-pointer"
+            >
+              Explorar Serviços
+            </motion.div>
+          </Link>
         </motion.div>
       </section>
 
@@ -148,7 +159,7 @@ return (
               whileInView="visible"
               viewport={{ once: true }}
             >
-              {[
+              {[ 
                 { name: "Culinária", img: "/Images/Culinaria.png" },
                 { name: "Automotivo", img: "/Images/Automotivo.png" },
                 { name: "Domésticos", img: "/Images/Domesticos.png" },
@@ -178,7 +189,6 @@ return (
         </div>
       </motion.section>
 
-      {/* Professionals Grid */}
       <motion.section
         className="bg-gray-50 py-12"
         variants={fadeInUp}
@@ -202,43 +212,57 @@ return (
             </div>
           </div>
 
-          <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-6"
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-          >
-            {Array.from({ length: 8 }).map((_, index) => (
-              <motion.div
-                key={index}
-                variants={fadeInUp}
-                whileHover={{ y: -5, boxShadow: "0 10px 15px rgba(0,0,0,0.1)" }}
-                className="bg-white rounded-xl shadow transition p-6 text-center"
-              >
-                <img
-                  src="/Images/DwightProfile.png"
-                  alt="Professional"
-                  className="mx-auto mb-4 rounded-[25%] w-24 h-24 object-cover"
-                />
-                <div className="flex justify-center items-center mb-2">
-                  <span className="text-yellow-400">★</span>
-                  <span className="ml-1 text-gray-600 text-sm">5.0</span>
-                </div>
-                <h3 className="font-semibold text-lg">
-                  Marcello Pereira Araujo
-                </h3>
-                <p className="text-sm text-gray-500">Profissional</p>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="mt-4 bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-700 transition"
+          {loading ? (
+            <p className="text-gray-600 text-center">Carregando...</p>
+          ) : (
+            <motion.div
+              className="grid grid-cols-2 md:grid-cols-4 gap-6"
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+            >
+              {profissionais.map((prof) => (
+                <motion.div
+                  key={prof.id}
+                  variants={fadeInUp}
+                  whileHover={{ y: -5, boxShadow: "0 10px 15px rgba(0,0,0,0.1)" }}
+                  className="bg-white rounded-xl shadow transition p-6 text-center"
                 >
-                  Contratar
-                </motion.button>
-              </motion.div>
-            ))}
-          </motion.div>
+                  <img
+                    src={
+                      prof.foto
+                        ? `http://127.0.0.1:8000${prof.foto}`
+                        : "/Images/DwightProfile.png"
+                    }
+                    alt={prof.nome}
+                    className="mx-auto mb-4 rounded-[25%] w-24 h-24 object-cover"
+                  />
+
+                  <div className="flex justify-center items-center mb-2">
+                    <span className="text-yellow-400">★</span>
+                    <span className="ml-1 text-gray-600 text-sm">
+                      {prof.avaliacao_media || "5.0"}
+                    </span>
+                  </div>
+                  <h3 className="font-semibold text-lg">
+                    {prof.usuario.username}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    {prof.especialidades?.join(", ") || "Profissional"}
+                  </p>
+
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="mt-4 bg-green-600 text-white px-5 py-2 rounded-md hover:bg-green-700 transition"
+                  >
+                    Contratar
+                  </motion.button>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
         </div>
       </motion.section>
 
@@ -246,31 +270,24 @@ return (
       <footer className="bg-black text-gray-300 py-12 mt-12">
         <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12">
           <div>
-            <img
-              src="/Images/FazFastLogo_Inv.png"
-              alt="FazFast Logo"
-              className="h-12 mb-4"
-            />
+            <img src="/Images/FazFastLogo_Inv.png" alt="FazFast Logo" className="h-12 mb-4" />
             <p className="text-sm leading-relaxed">
-              Plataforma de serviços sob demanda, conectando clientes e
-              profissionais em todo o Brasil com qualidade e confiança.
+              Plataforma de serviços sob demanda, conectando clientes e profissionais em todo
+              o Brasil com qualidade e confiança.
             </p>
           </div>
           <nav>
-            <h4 className="font-semibold mb-4 text-white">
-              Assistência ao Cliente
-            </h4>
+            <h4 className="font-semibold mb-4 text-white">Assistência ao Cliente</h4>
             <ul className="space-y-2 text-sm">
-              {["Buscar", "Recomendado", "Categorias", "Perguntas Frequentes", "Termos de Uso"].map((link) => (
-                <li key={link}>
-                  <a
-                    href="#"
-                    className="hover:text-green-600 transition-colors duration-300"
-                  >
-                    {link}
-                  </a>
-                </li>
-              ))}
+              {["Buscar", "Recomendado", "Categorias", "Perguntas Frequentes", "Termos de Uso"].map(
+                (link) => (
+                  <li key={link}>
+                    <a href="#" className="hover:text-green-600 transition-colors duration-300">
+                      {link}
+                    </a>
+                  </li>
+                )
+              )}
             </ul>
           </nav>
           <div>
@@ -287,11 +304,7 @@ return (
                   aria-label={social.alt}
                   className="transition-transform duration-300 hover:scale-110"
                 >
-                  <img
-                    src={social.img}
-                    alt={social.alt}
-                    className="h-8 w-8 object-contain"
-                  />
+                  <img src={social.img} alt={social.alt} className="h-8 w-8 object-contain" />
                 </a>
               ))}
             </div>
@@ -299,8 +312,7 @@ return (
         </div>
         <div className="mt-10 border-t border-gray-800 pt-6 text-center text-sm text-gray-500">
           © {new Date().getFullYear()}{" "}
-          <span className="text-white font-semibold">FazFast</span>. Todos os
-          direitos reservados.
+          <span className="text-white font-semibold">FazFast</span>. Todos os direitos reservados.
         </div>
       </footer>
     </div>

@@ -2,6 +2,7 @@ from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from .serializers import ProfissionalHomeSerializer
 
 from core.models import (
     Usuario,
@@ -47,7 +48,25 @@ class ClienteViewSet(viewsets.ModelViewSet):
 class ProfissionalViewSet(viewsets.ModelViewSet):
     queryset = Profissional.objects.all().order_by("id")
     serializer_class = ProfissionalSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+
+    @action(detail=False, methods=["get"])
+    def destaques(self, request):
+        profissionais = Profissional.objects.order_by("-avaliacao_media")[:10]
+        serializer = ProfissionalHomeSerializer(profissionais, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"])
+    def novos(self, request):
+        profissionais = Profissional.objects.order_by("-usuario__date_joined")[:10]
+        serializer = ProfissionalHomeSerializer(profissionais, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"])
+    def populares(self, request):
+        profissionais = Profissional.objects.order_by("-avaliacao_media")[:10]
+        serializer = ProfissionalHomeSerializer(profissionais, many=True)
+        return Response(serializer.data)
 
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
@@ -64,6 +83,12 @@ class ServicoViewSet(viewsets.ModelViewSet):
     serializer_class = ServicoSerializer
     permission_classes = [AllowAny]
 
+    @action(detail=False, methods=["get"])
+    def buscar(self, request):
+        termo = request.query_params.get("q", "")
+        qs = Servico.objects.filter(nome__icontains=termo)[:20]
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
 
 class PortfolioItemViewSet(viewsets.ModelViewSet):
     queryset = PortfolioItem.objects.all().order_by("id")

@@ -77,8 +77,8 @@ const LoginPage: React.FC = () => {
     }
 
 // Caso padrão
-console.log("➡️ Redirecionando para /perfil");
-router.push("/perfil");
+console.log("➡️ Redirecionando para /");
+router.push("/");
 
 
   } catch (err) {
