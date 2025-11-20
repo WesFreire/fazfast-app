@@ -4,52 +4,19 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 type Profissional = {
   id: number;
   nome: string;
-  genero: "Masculino" | "Feminino";
+  genero: "Masculino" | "Feminino" | "Outro" | "Prefiro não informar";
   formacao: string;
   anos: string[];
   materia: string;
   avaliacao: number;
+  experiencia: number;
   imagem: string;
 };
-
-const mockProfissionais: Profissional[] = [
-  {
-    id: 1,
-    nome: "Marcelo Pereira Araujo",
-    genero: "Masculino",
-    formacao: "Licenciatura",
-    anos: ["Fundamental", "Médio"],
-    materia: "Matemática",
-    avaliacao: 4.9,
-    imagem: "/Images/DwightProfile.png",
-  },
-  {
-    id: 2,
-    nome: "Ana Costa",
-    genero: "Feminino",
-    formacao: "Mestrado",
-    anos: ["Médio", "Superior"],
-    materia: "Biologia",
-    avaliacao: 5.0,
-    imagem: "/Images/DwightProfile.png",
-  },
-  {
-    id: 3,
-    nome: "João Pereira",
-    genero: "Masculino",
-    formacao: "Doutorado",
-    anos: ["Superior"],
-    materia: "História",
-    avaliacao: 4.7,
-    imagem: "/Images/DwightProfile.png",
-  },
-];
-
 
 function useScrollReveal() {
   const controls = useAnimation();
@@ -91,7 +58,7 @@ const ProfessionalCard: React.FC<{ profissional: Profissional }> = ({ profission
       initial={{ opacity: 0, y: 40 }}
       animate={controls}
       variants={variants}
-      className="bg-white rounded-xl shadow hover:shadow-xl hover:-translate-y-1 transition-all duration-200 p-6 text-center"
+      className="bg-white rounded-xl shadow hover:shadow-xl hover:-translate-y-1 transition-all duration-200 p-6 text-center cursor-pointer"
     >
       <img
         src={profissional.imagem}
@@ -100,10 +67,21 @@ const ProfessionalCard: React.FC<{ profissional: Profissional }> = ({ profission
       />
       <h3 className="font-semibold text-lg">{profissional.nome}</h3>
       <p className="text-sm text-gray-500 mb-2">{profissional.materia}</p>
+
+      <p className="text-xs text-gray-600 mb-2">
+        {profissional.experiencia} anos de experiência
+      </p>
+
+      <div className="flex justify-center items-center gap-2 text-gray-500 text-sm mb-2">
+        <span className="px-2 py-1 rounded-md bg-gray-100 text-xs">{profissional.genero}</span>
+        <span className="px-2 py-1 rounded-md bg-gray-100 text-xs">{profissional.formacao}</span>
+      </div>
+
       <div className="flex justify-center items-center mb-3 text-yellow-500 text-sm">
         ★ {profissional.avaliacao.toFixed(1)}
       </div>
-      <button className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition">
+
+      <button className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition cursor-pointer">
         Contratar
       </button>
     </motion.div>
@@ -112,49 +90,95 @@ const ProfessionalCard: React.FC<{ profissional: Profissional }> = ({ profission
 
 const Menu: React.FC = () => {
   const searchParams = useSearchParams();
-  const searchFromHome = searchParams.get("search") || "";
+  const router = useRouter();
 
+  const searchFromHome = searchParams.get("search") || "";
   const [searchTerm, setSearchTerm] = useState(searchFromHome);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+    router.push("/login");
+  };
+
+  const [profissionais, setProfissionais] = useState<Profissional[]>([]);
+
   useEffect(() => {
-    window.scrollTo(0, 0);
+    async function loadData() {
+      try {
+        const r = await fetch("http://127.0.0.1:8000/api/profissionais/");
+        const data = await r.json();
+
+        const convertidos: Profissional[] = data.map((p: any) => ({
+          id: p.id,
+          nome: p.usuario.username,
+          genero:
+            p.usuario.genero?.charAt(0).toUpperCase() +
+              p.usuario.genero?.slice(1) || "Prefiro não informar",
+
+          formacao: p.formacao ?? "Não informado",
+          anos: p.anos ?? [],
+          materia: p.especialidades?.[0] ?? "Não informado",
+          avaliacao: p.avaliacao_media ?? 0,
+
+          experiencia: p.experiencia_anos ?? 0,
+
+          imagem:
+            p.usuario.foto_perfil && p.usuario.foto_perfil !== ""
+              ? p.usuario.foto_perfil
+              : "/Images/DwightProfile.png",
+        }));
+
+        setProfissionais(convertidos);
+      } catch (err) {
+        console.log("Erro ao carregar API:", err);
+      }
+    }
+
+    loadData();
   }, []);
 
   const [filtros, setFiltros] = useState({
-    materia: "",
-    anos: [] as string[],
-    formacao: [] as string[],
+    categoria: "",
     genero: [] as string[],
+    avaliacaoMin: 0,
+    experienciaMin: 0,
     ordenacao: "avaliacao",
   });
 
-  const toggleFiltroArray = (tipo: "anos" | "formacao" | "genero", valor: string) => {
+  const toggleGenero = (valor: string) => {
     setFiltros((prev) => ({
       ...prev,
-      [tipo]: prev[tipo].includes(valor)
-        ? prev[tipo].filter((v) => v !== valor)
-        : [...prev[tipo], valor],
+      genero: prev.genero.includes(valor)
+        ? prev.genero.filter((x) => x !== valor)
+        : [...prev.genero, valor],
     }));
   };
 
-  const profissionaisFiltrados = mockProfissionais
-    .filter((p) =>
-      searchTerm === "" ||
-      p.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.materia.toLowerCase().includes(searchTerm.toLowerCase())
+  const makeRangeBackground = (value: number, min: number, max: number) => {
+    const pct = ((value - min) / (max - min)) * 100;
+
+    return `linear-gradient(90deg, #16a34a ${pct}%, #e6e6e6 ${pct}%)`;
+  };
+
+  const profissionaisFiltrados = profissionais
+    .filter(
+      (p) =>
+        searchTerm === "" ||
+        p.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.materia.toLowerCase().includes(searchTerm.toLowerCase())
     )
-    .filter((p) =>
-      filtros.materia === "" || p.materia.toLowerCase().includes(filtros.materia.toLowerCase())
-    )
-    .filter((p) =>
-      filtros.anos.length ? filtros.anos.some((a) => p.anos.includes(a)) : true
-    )
-    .filter((p) =>
-      filtros.formacao.length ? filtros.formacao.includes(p.formacao) : true
+    .filter(
+      (p) =>
+        filtros.categoria === "" ||
+        p.materia.toLowerCase().includes(filtros.categoria.toLowerCase())
     )
     .filter((p) =>
       filtros.genero.length ? filtros.genero.includes(p.genero) : true
     )
+    .filter((p) => p.avaliacao >= filtros.avaliacaoMin)
+    .filter((p) => p.experiencia >= filtros.experienciaMin)
     .sort((a, b) => {
       if (filtros.ordenacao === "avaliacao") return b.avaliacao - a.avaliacao;
       if (filtros.ordenacao === "nome") return a.nome.localeCompare(b.nome);
@@ -163,7 +187,7 @@ const Menu: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 font-sans text-gray-800 overflow-x-hidden">
-
+      {/* HEADER */}
       <motion.header
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -172,9 +196,17 @@ const Menu: React.FC = () => {
       >
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/">
-            <Image src="/Images/FazFastLogo.png" alt="FazFast Logo" width={160} height={40} className="h-10 w-auto" priority/>
+            <Image
+              src="/Images/FazFastLogo.png"
+              alt="FazFast Logo"
+              width={160}
+              height={40}
+              className="h-10 w-auto"
+              priority
+            />
           </Link>
 
+          {/* nav */}
           <nav className="hidden md:flex space-x-8 font-medium">
             <Link
               href="/"
@@ -209,7 +241,11 @@ const Menu: React.FC = () => {
                   if (searchTerm.trim() === "") {
                     window.history.replaceState(null, "", "/catalogo");
                   } else {
-                    window.history.replaceState(null, "", `/catalogo?search=${searchTerm}`);
+                    window.history.replaceState(
+                      null,
+                      "",
+                      `/catalogo?search=${searchTerm}`
+                    );
                   }
                 }
               }}
@@ -220,14 +256,17 @@ const Menu: React.FC = () => {
               <Image src="/Images/login.png" alt="Login" width={28} height={28} />
             </Link>
 
-            <button className="p-2 rounded-xl hover:bg-red-100 transition-all">
+            <button
+              onClick={handleLogout}
+              className="p-2 rounded-xl hover:bg-red-100 transition-all cursor-pointer"
+            >
               <Image src="/Images/logout.png" alt="Logout" width={28} height={28} />
             </button>
           </div>
         </div>
       </motion.header>
 
-      {/* Breadcrumb */}
+      {/* BREADCRUMB */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
@@ -235,50 +274,95 @@ const Menu: React.FC = () => {
         className="container mx-auto px-6 py-6"
       >
         <div className="text-sm text-gray-500 mb-2">
-          Home &gt; <span className="text-green-600">Educação</span>
+          Home &gt; <span className="text-green-600">Catalogo</span>
         </div>
-        <h1 className="text-3xl font-bold text-gray-800">Encontre Professores de Educação</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Encontre Profissionais</h1>
         <p className="text-gray-500 mt-1 text-sm">Use os filtros ao lado para refinar sua busca.</p>
       </motion.div>
 
-      {/* Layout */}
+      {/* LAYOUT */}
       <div className="container mx-auto px-6 pb-12 grid grid-cols-1 md:grid-cols-4 gap-8">
-        
-        {/* Sidebar Filtros */}
+        {/* SIDEBAR */}
         <aside className="md:col-span-1 bg-white p-5 rounded-xl shadow h-fit sticky top-24 space-y-5">
+          {/* Categoria */}
           <div>
-            <h4 className="font-semibold mb-2">Matéria</h4>
+            <h4 className="font-semibold mb-2">Categoria</h4>
             <input
               type="text"
               placeholder="Pesquisar..."
-              value={filtros.materia}
-              onChange={(e) => setFiltros({ ...filtros, materia: e.target.value })}
+              value={filtros.categoria}
+              onChange={(e) =>
+                setFiltros({ ...filtros, categoria: e.target.value })
+              }
               className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
 
-          {[
-            { title: "Anos de Ensino", key: "anos", values: ["Fundamental", "Médio", "Superior"] },
-            { title: "Formação", key: "formacao", values: ["Licenciatura", "Mestrado", "Doutorado"] },
-            { title: "Gênero", key: "genero", values: ["Masculino", "Feminino"] },
-          ].map((section) => (
-            <div key={section.key}>
-              <h4 className="font-semibold mb-2">{section.title}</h4>
-              {section.values.map((val) => (
-                <label key={val} className="flex items-center space-x-2 text-sm mb-1">
-                  <input
-                    type="checkbox"
-                    checked={(filtros as any)[section.key].includes(val)}
-                    onChange={() => toggleFiltroArray(section.key as any, val)}
-                  />
-                  <span>{val}</span>
-                </label>
-              ))}
-            </div>
-          ))}
+          <div>
+            <h4 className="font-semibold mb-2">Gênero</h4>
+
+            {["Masculino", "Feminino", "Outro", "Prefiro não informar"].map((g) => (
+              <label key={g} className="flex items-center space-x-2 text-sm mb-1">
+                <input
+                  type="checkbox"
+                  checked={filtros.genero.includes(g)}
+                  onChange={() => toggleGenero(g)}
+                />
+                <span>{g}</span>
+              </label>
+            ))}
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-2">Avaliação mínima</h4>
+
+            <input
+              type="range"
+              min={0}
+              max={5}
+              step={0.5}
+              value={filtros.avaliacaoMin}
+              onChange={(e) =>
+                setFiltros({
+                  ...filtros,
+                  avaliacaoMin: Number(e.target.value),
+                })
+              }
+              className="w-full slider-green"
+              style={{ background: makeRangeBackground(filtros.avaliacaoMin, 0, 5) }}
+            />
+
+            <p className="text-sm text-gray-500 mt-1">
+              A partir de ⭐ {filtros.avaliacaoMin.toFixed(1)}
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-2">Experiência mínima (anos)</h4>
+
+            <input
+              type="range"
+              min={0}
+              max={30}
+              step={1}
+              value={filtros.experienciaMin}
+              onChange={(e) =>
+                setFiltros({
+                  ...filtros,
+                  experienciaMin: Number(e.target.value),
+                })
+              }
+              className="w-full slider-green"
+              style={{ background: makeRangeBackground(filtros.experienciaMin, 0, 30) }}
+            />
+
+            <p className="text-sm text-gray-500 mt-1">
+              {filtros.experienciaMin} anos ou mais
+            </p>
+          </div>
         </aside>
 
-        {/* Conteúdo */}
+        {/* CONTEÚDO */}
         <main className="md:col-span-3">
           <div className="flex justify-between items-center mb-6">
             <p className="text-sm text-gray-600">
@@ -303,7 +387,7 @@ const Menu: React.FC = () => {
         </main>
       </div>
 
-      {/* Footer */}
+      {/* FOOTER */}
       <footer className="bg-black text-gray-300 py-12 mt-12">
         <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-12">
           <div>
@@ -339,11 +423,63 @@ const Menu: React.FC = () => {
         </div>
 
         <div className="mt-10 border-t border-gray-800 pt-6 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()}{" "}
-          <span className="text-white font-semibold">FazFast</span>. Todos os direitos reservados.
+          © {new Date().getFullYear()} <span className="text-white font-semibold">FazFast</span>. Todos os direitos reservados.
         </div>
       </footer>
 
+      <style jsx>{`
+        /* Base do track (quando não preenchido) */
+        input[type="range"].slider-green {
+          -webkit-appearance: none;
+          appearance: none;
+          height: 8px;
+          border-radius: 999px;
+          background: #e6e6e6; /* fallback */
+          outline: none;
+        }
+
+        /* Chrome/Safari/Webkit thumb */
+        input[type="range"].slider-green::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: #16a34a; /* verde principal */
+          border: 3px solid white;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+          cursor: pointer;
+          margin-top: -5px; /* centraliza no track de 8px */
+        }
+
+        /* Firefox thumb */
+        input[type="range"].slider-green::-moz-range-thumb {
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: #16a34a;
+          border: 3px solid white;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+          cursor: pointer;
+        }
+
+        /* Firefox track: keep neutral - actual fill handled by inline background */
+        input[type="range"].slider-green::-moz-range-track {
+          height: 8px;
+          border-radius: 999px;
+          background: transparent;
+        }
+
+        /* Edge / IE - try to style fallback */
+        input[type="range"].slider-green::-ms-fill-lower {
+          background: #16a34a;
+          border-radius: 999px;
+        }
+        input[type="range"].slider-green::-ms-fill-upper {
+          background: #e6e6e6;
+          border-radius: 999px;
+        }
+      `}</style>
     </div>
   );
 };

@@ -1,13 +1,28 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 
 class Usuario(AbstractUser):
+    GENERO_CHOICES = [
+        ("masculino", "Masculino"),
+        ("feminino", "Feminino"),
+        ("outro", "Outro"),
+        ("nao_informar", "Prefiro não informar"),
+    ]
+
     email = models.EmailField(unique=True)
     telefone = models.CharField(max_length=20, blank=True, null=True)
     endereco = models.CharField(max_length=255, blank=True, null=True)
     foto_perfil = models.ImageField(upload_to="perfil/", blank=True, null=True)
+
+    genero = models.CharField(
+        max_length=20,
+        choices=GENERO_CHOICES,
+        blank=True,
+        null=True
+    )
 
     pode_prestar = models.BooleanField(default=False)
     papel_ativo = models.CharField(
@@ -40,7 +55,13 @@ class Profissional(models.Model):
     cnpj = models.CharField(max_length=18, blank=True, null=True)
     experiencia_anos = models.PositiveSmallIntegerField(default=0)
     especialidades = models.ManyToManyField("Categoria", blank=True, related_name="profissionais")
-    avaliacao_media = models.FloatField(default=0.0)
+    avaliacao_media = models.FloatField(
+        default=0.0,
+        validators=[
+            MinValueValidator(0.0),
+            MaxValueValidator(5.0)
+        ]
+    )
     data_criacao = models.DateTimeField(default=timezone.now)
     total_servicos = models.PositiveIntegerField(default=0)
 

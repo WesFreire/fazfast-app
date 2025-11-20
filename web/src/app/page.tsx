@@ -86,10 +86,8 @@ const FazFastHome: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-
     sessionStorage.removeItem("token");
     document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
-
     router.push("/login");
   };
 
@@ -271,7 +269,6 @@ const FazFastHome: React.FC = () => {
         </div>
       </motion.section>
 
-      {/* Profissionais em destaque */}
       <motion.section
         className="bg-gray-50 py-12"
         variants={fadeInUp}
@@ -302,7 +299,13 @@ const FazFastHome: React.FC = () => {
           {loading ? (
             <p className="text-gray-600 text-center">Carregando...</p>
           ) : (
-            <motion.div className="grid grid-cols-2 md:grid-cols-4 gap-6" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }}>
+            <motion.div
+              className="grid grid-cols-2 md:grid-cols-4 gap-6"
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+            >
               {ordenarProfissionais().map((prof) => (
                 <motion.div
                   key={prof.id}
@@ -311,18 +314,29 @@ const FazFastHome: React.FC = () => {
                   className="bg-white rounded-xl shadow transition p-6 text-center cursor-pointer"
                 >
                   <img
-                    src={prof.foto ? `http://127.0.0.1:8000${prof.foto}` : "/Images/DwightProfile.png"}
-                    alt={prof.nome}
+                    src={
+                      prof?.usuario?.foto_perfil
+                        ? prof.usuario.foto_perfil
+                        : "/Images/DwightProfile.png"
+                    }
+                    alt={prof.usuario?.username || "Profissional"}
                     className="mx-auto mb-4 rounded-[25%] w-24 h-24 object-cover"
                   />
+
                   <div className="flex justify-center items-center mb-2">
                     <span className="text-yellow-400">★</span>
                     <span className="ml-1 text-gray-600 text-sm">
                       {prof.avaliacao_media || "5.0"}
                     </span>
                   </div>
-                  <h3 className="font-semibold text-lg">{prof.usuario?.username || prof.usuario?.nome || "Profissional"}</h3>
-                  <p className="text-sm text-gray-500">{prof.especialidades?.join(", ") || "Profissional"}</p>
+
+                  <h3 className="font-semibold text-lg">
+                    {prof.usuario?.username || "Profissional"}
+                  </h3>
+
+                  <p className="text-sm text-gray-500">
+                    {prof.especialidades?.join(", ") || "Profissional"}
+                  </p>
 
                   <motion.button
                     whileHover={{ scale: 1.05 }}

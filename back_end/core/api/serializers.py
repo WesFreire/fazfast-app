@@ -43,6 +43,17 @@ UsuarioModel = get_user_model()
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+
+    genero = serializers.ChoiceField(
+        choices=[
+            ("masculino", "Masculino"),
+            ("feminino", "Feminino"),
+            ("outro", "Outro"),
+            ("nao_informar", "Prefiro não informar"),
+        ],
+        required=False
+    )
+
     password = serializers.CharField(
         write_only=True,
         required=True,
@@ -51,13 +62,13 @@ class RegisterSerializer(serializers.ModelSerializer):
     )
     password2 = serializers.CharField(write_only=True, required=True)
     papel = serializers.ChoiceField(
-        choices=[("cliente", "Cliente"), ("prestador", "Prestador")],
+        choices=[("cliente", "Cliente"), ("profissional", "Profissional")],
         write_only=True
     )
 
     class Meta:
         model = UsuarioModel
-        fields = ["username", "email", "password", "password2", "papel"]
+        fields = ["username", "email", "password", "password2", "papel", "genero"]
 
     def validate(self, attrs):
         if attrs["password"] != attrs["password2"]:
@@ -66,10 +77,15 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         papel = validated_data.pop("papel")
+        genero = validated_data.pop("genero", None)
         validated_data.pop("password2")
         password = validated_data.pop("password")
 
         user = UsuarioModel(**validated_data)
+
+        if genero:
+            user.genero = genero
+
         user.set_password(password)
         user.save()
 
@@ -82,7 +98,9 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         user.papel_ativo = papel
         user.save(update_fields=["papel_ativo"])
+
         return user
+
 
 
 class ClienteSerializer(serializers.ModelSerializer):
@@ -117,6 +135,10 @@ class ProfissionalSerializer(serializers.ModelSerializer):
             "data_criacao",
             "total_servicos",
         ]
+        def validate_avaliacao_media(self, value):
+            if value < 0 or value > 5:
+                raise serializers.ValidationError("A avaliação deve estar entre 0 e 5.")
+            return value
 
 
 class CategoriaSerializer(serializers.ModelSerializer):

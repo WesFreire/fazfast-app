@@ -1,20 +1,43 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Usuario, Cliente, Profissional, Categoria, Servico, PortfolioItem, Disponibilidade, Contrato, Avaliacao, Notificacao
-
+from .models import (
+    Usuario, Cliente, Profissional, Categoria, Servico,
+    PortfolioItem, Disponibilidade, Contrato, Avaliacao, Notificacao
+)
 
 @admin.register(Usuario)
 class UsuarioAdmin(UserAdmin):
-    list_display = ("email", "username", "telefone", "endereco", "papel_ativo", "pode_prestar", "is_staff")
-    list_filter = ("papel_ativo", "pode_prestar", "is_staff", "is_superuser")
+    list_display = (
+        "email",
+        "username",
+        "telefone",
+        "endereco",
+        "genero",
+        "papel_ativo",
+        "pode_prestar",
+        "is_staff"
+    )
+    list_filter = ("papel_ativo", "pode_prestar", "genero", "is_staff", "is_superuser")
     search_fields = ("email", "username", "telefone")
     ordering = ("email",)
 
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        ("Informações pessoais", {"fields": ("username", "telefone", "endereco", "foto_perfil")}),
-        ("Permissões", {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")}),
-        ("Papel no sistema", {"fields": ("papel_ativo", "pode_prestar")}),
+        ("Informações pessoais", {
+            "fields": (
+                "username",
+                "telefone",
+                "endereco",
+                "genero", 
+                "foto_perfil"
+            )
+        }),
+        ("Permissões", {
+            "fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")
+        }),
+        ("Papel no sistema", {
+            "fields": ("papel_ativo", "pode_prestar")
+        }),
     )
 
     add_fieldsets = (
