@@ -21,13 +21,14 @@ const LoginPage: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
   setError(null);
 
   try {
     console.log("➡️ Iniciando login com:", formData);
 
+    // 1. Faz o Login para pegar o Token
     const response = await fetch("http://localhost:8000/api/token/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -39,51 +40,44 @@ const LoginPage: React.FC = () => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      console.error("❌ Erro no login:", errorData);
       setError(errorData.detail || "E-mail ou senha incorretos.");
       return;
     }
 
     const data = await response.json();
-    console.log("✅ Login bem-sucedido:", data);
+    console.log("✅ Login bem-sucedido. Token recebido.");
 
-    // Salva tokens em cookies
-    document.cookie = `access=${data.access}; path=/; SameSite=Lax;`;
-    document.cookie = `refresh=${data.refresh}; path=/; SameSite=Lax;`;
+    // 2. IMPORTANTE: Salvar no localStorage (igual ao PerfilUsuario)
+    localStorage.setItem("accessToken", data.access);
+    localStorage.setItem("refreshToken", data.refresh);
 
-    // Busca os dados do usuário
+    // 3. Busca os dados do usuário para saber o papel (role)
     const profileResponse = await fetch("http://localhost:8000/api/me/", {
       headers: { Authorization: `Bearer ${data.access}` },
     });
 
     if (!profileResponse.ok) {
-      console.error("❌ Erro ao buscar perfil:", profileResponse.status);
-      setError("Erro ao carregar dados do usuário.");
+      console.error("❌ Erro ao buscar perfil");
+      setError("Erro ao identificar usuário.");
       return;
     }
 
     const userData = await profileResponse.json();
-    console.log("👤 Dados do usuário:", userData);
+    console.log("👤 Papel do usuário:", userData.papel_ativo);
 
-    // Redireciona conforme o papel do usuário
+    // 4. Redirecionamento
     if (userData.papel_ativo === "cliente") {
       router.push("/perfilusuario");
-      return;
-    }
-
-    if (userData.papel_ativo === "profissional") {
+    } else if (userData.papel_ativo === "profissional") {
       router.push("/perfilprofissional");
-      return;
+    } else {
+      // Fallback caso o papel não seja nem cliente nem profissional
+      router.push("/");
     }
-
-// Caso padrão
-console.log("➡️ Redirecionando para /");
-router.push("/");
-
 
   } catch (err) {
-    console.error("⚠️ Erro de conexão:", err);
-    setError("Erro ao conectar ao servidor.");
+    console.error("⚠️ Erro crítico:", err);
+    setError("Erro de conexão com o servidor.");
   }
 };
 

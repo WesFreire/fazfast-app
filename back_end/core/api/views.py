@@ -24,4 +24,16 @@ class UserProfileView(APIView):
     def get(self, request):
         user = request.user
         serializer = UsuarioSerializer(user)
+        # Retorna a URL completa da imagem se existir
         return Response(serializer.data)
+
+    def patch(self, request):
+        user = request.user
+        # partial=True permite atualizar só alguns campos (ex: só a foto ou só o nome)
+        serializer = UsuarioSerializer(user, data=request.data, partial=True)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
