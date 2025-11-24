@@ -21,7 +21,7 @@ type Profissional = {
 function useScrollReveal() {
   const controls = useAnimation();
   const ref = useRef<HTMLDivElement | null>(null);
-
+  
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -47,6 +47,7 @@ function useScrollReveal() {
 
 const ProfessionalCard: React.FC<{ profissional: Profissional }> = ({ profissional }) => {
   const { ref, controls } = useScrollReveal();
+  const router = useRouter();
 
   const variants = {
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
@@ -81,7 +82,7 @@ const ProfessionalCard: React.FC<{ profissional: Profissional }> = ({ profission
         ★ {profissional.avaliacao.toFixed(1)}
       </div>
 
-      <button className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition cursor-pointer">
+      <button className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition cursor-pointer" onClick={() => router.push(`/perfil/${profissional.id}`)}>
         Contratar
       </button>
     </motion.div>
