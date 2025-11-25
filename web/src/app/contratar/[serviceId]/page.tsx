@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion"; // Importamos Variants para as animações
 
 // Interface do Serviço conforme API
 interface ServiceData {
@@ -22,6 +22,13 @@ interface ServiceData {
     };
   };
 }
+
+// Animações
+const fadeInUp: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+};
+
 
 const ContratarServico: React.FC = () => {
   const router = useRouter();
@@ -90,7 +97,8 @@ const ContratarServico: React.FC = () => {
       
       // Garante que cliData seja um array (drf pagination check)
       const cliList = Array.isArray(cliData) ? cliData : cliData.results || [];
-      const meuCliente = cliList.find((c: any) => c.usuario === meData.id || c.usuario.id === meData.id);
+      // Usando a lógica mais robusta para encontrar o cliente ID (compatível com os serializers)
+      const meuCliente = cliList.find((c: any) => c.usuario === meData.id || (c.usuario && c.usuario.id === meData.id));
       
       if (!meuCliente) {
          alert("Você precisa completar seu perfil de Cliente primeiro.");
@@ -98,18 +106,18 @@ const ContratarServico: React.FC = () => {
          return;
       }
 
-      // 3. Monta o payload final (CORRIGIDO: usa _id)
+      // 3. Monta o payload final (usando _id conforme o backend espera para POST)
       const payload = {
-          cliente_id: meuCliente.id,          // <--- Mudou de 'cliente' para 'cliente_id'
+          cliente_id: meuCliente.id,          
           servico: service.id,
-          profissional_id: service.profissional.id, // <--- Mudou de 'profissional' para 'profissional_id'
+          profissional_id: service.profissional.id, 
           data_agendada: dataAgendamento,
           hora_inicio: horaInicio,
           hora_fim: horaFim || null,
           local_atendimento: localAtendimento,
           observacoes: observacoes,
           status: "pendente",
-          preco: parseFloat(service.preco)
+          preco: parseFloat(service.preco) // Garante que o preço seja float
       };
       
       // 4. Envia para a API de contratos
@@ -128,7 +136,11 @@ const ContratarServico: React.FC = () => {
       } else {
         const errData = await res.json();
         console.error(errData);
-        alert("Erro ao criar contrato: " + JSON.stringify(errData));
+        let errorMessage = "Erro desconhecido ao criar contrato.";
+        if (typeof errData === 'object' && errData !== null) {
+            errorMessage = Object.values(errData).flat().join(". ") || errorMessage;
+        }
+        alert("Erro ao criar contrato: " + errorMessage);
       }
 
     } catch (error) {
@@ -139,7 +151,8 @@ const ContratarServico: React.FC = () => {
     }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
+  // Melhoria no feedback de carregamento
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin h-10 w-10 border-4 border-green-500 rounded-full border-t-transparent"></div></div>;
   if (!service) return null;
 
   const profName = service.profissional.usuario.first_name 
@@ -153,112 +166,149 @@ const ContratarServico: React.FC = () => {
     : "/Images/DwightProfile.png";
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-12 px-4 sm:px-6 lg:px-8">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-4xl w-full bg-white rounded-2xl shadow-xl overflow-hidden"
+    // 1. Aplica o fundo gradiente padrão
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 font-sans text-gray-800 overflow-x-hidden">
+      
+      {/* 2. Adiciona o Header de Navegação */}
+      <motion.header 
+        initial={{ opacity: 0, y: -50 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        className="bg-white/90 shadow-lg sticky top-0 z-50 backdrop-blur-md"
       >
-        <div className="bg-green-600 px-8 py-6 flex justify-between items-center">
-            <div>
-                <h2 className="text-2xl font-bold text-white">Contratar Serviço</h2>
-                <p className="text-green-100 text-sm">Preencha os detalhes do agendamento</p>
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+            <Link href="/"><Image src="/Images/FazFastLogo.png" alt="Logo" width={140} height={35} /></Link>
+            <nav className="hidden md:flex space-x-8 font-medium">
+                <Link href="/" className="text-gray-600 hover:text-green-600">Home</Link>
+                <Link href="/catalogo" className="text-green-600 font-bold">Catálogo</Link>
+                <Link href="/perfilusuario" className="text-gray-600 hover:text-green-600">Perfil</Link>
+            </nav>
+            <div className="flex items-center gap-4">
+                <Link href="/perfilusuario" className="text-green-600 font-medium hover:bg-green-50 px-4 py-2 rounded-lg transition">Meu Perfil</Link>
             </div>
-            <Link href="/catalogo" className="text-white hover:text-green-200 text-sm">Cancelar</Link>
         </div>
+      </motion.header>
 
-        <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-10">
-            {/* Coluna Esquerda: Detalhes */}
-            <div className="border-r border-gray-100 pr-0 md:pr-8">
-                <div className="flex items-center space-x-4 mb-6">
-                    <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-green-100">
-                        <Image src={profFoto} alt="Prof" fill className="object-cover" unoptimized />
-                    </div>
-                    <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wide font-bold">Profissional</p>
-                        <p className="font-medium text-gray-900 text-lg">{profName}</p>
-                    </div>
-                </div>
+      {/* 3. Card Principal com animação e melhor sombra */}
+      <motion.div 
+        initial="hidden"
+        animate="visible"
+        variants={fadeInUp} 
+        className="max-w-4xl mx-auto w-full py-12 px-6"
+      >
+        <div 
+          className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100"
+        >
+          {/* Header do Card (Título) */}
+          <div className="bg-green-600 px-8 py-6 flex justify-between items-center">
+              <div>
+                  <h2 className="text-3xl font-extrabold text-white">Contratar Serviço</h2>
+                  <p className="text-green-100 text-base mt-1">Finalize o agendamento para {service.nome}</p>
+              </div>
+              <Link href="/catalogo" className="px-4 py-2 text-white bg-green-700 rounded-xl font-medium hover:bg-green-800 transition text-sm shadow-md">
+                  Cancelar
+              </Link>
+          </div>
 
-                <div className="bg-gray-50 p-5 rounded-xl mb-6 border border-gray-100">
-                    <p className="text-xs text-gray-500 uppercase tracking-wide font-bold mb-1">Serviço Selecionado</p>
-                    <h3 className="font-bold text-gray-800 text-xl mb-2">{service.nome}</h3>
-                    <p className="text-gray-600 text-sm">{service.descricao}</p>
-                </div>
+          <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-10">
+              {/* Coluna Esquerda: Detalhes */}
+              <div className="border-r border-gray-200 pr-0 md:pr-8">
+                  {/* Detalhes do Profissional */}
+                  <div className="flex items-center space-x-4 pb-6 border-b border-gray-100 mb-6">
+                      <div className="relative w-16 h-16 rounded-full overflow-hidden border-4 border-green-200 shadow-md">
+                          <Image src={profFoto} alt="Prof" fill className="object-cover" unoptimized />
+                      </div>
+                      <div>
+                          <p className="text-sm text-gray-500 uppercase tracking-wider font-semibold">Profissional</p>
+                          <p className="font-bold text-gray-900 text-xl">{profName}</p>
+                      </div>
+                  </div>
 
-                <div className="flex justify-between items-center py-4 border-t border-gray-200">
-                    <span className="font-medium text-gray-600">Valor Estimado</span>
-                    <span className="text-3xl font-bold text-green-600">R$ {service.preco}</span>
-                </div>
-            </div>
+                  {/* Detalhes do Serviço */}
+                  <div className="bg-green-50 p-6 rounded-xl mb-6 border border-green-100">
+                      <p className="text-sm text-green-700 uppercase tracking-wider font-bold mb-2">Serviço Selecionado</p>
+                      <h3 className="font-extrabold text-gray-900 text-2xl mb-2">{service.nome}</h3>
+                      <p className="text-gray-700 text-base leading-relaxed">{service.descricao}</p>
+                  </div>
 
-            {/* Coluna Direita: Formulário */}
-            <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Data</label>
-                        <input 
-                            type="date" 
-                            required
-                            value={dataAgendamento}
-                            onChange={(e) => setDataAgendamento(e.target.value)}
-                            className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 p-2.5 border"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Hora Início</label>
-                        <input 
-                            type="time" 
-                            required
-                            value={horaInicio}
-                            onChange={(e) => setHoraInicio(e.target.value)}
-                            className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 p-2.5 border"
-                        />
-                    </div>
-                </div>
+                  {/* Valor */}
+                  <div className="flex justify-between items-center py-4 pt-0">
+                      <span className="font-semibold text-lg text-gray-700">Valor do Serviço</span>
+                      <span className="text-4xl font-extrabold text-green-600">R$ {service.preco}</span>
+                  </div>
+              </div>
 
-                <div>
-                     <label className="block text-sm font-medium text-gray-700 mb-1">Hora Término (Opcional)</label>
-                     <input 
-                        type="time" 
-                        value={horaFim}
-                        onChange={(e) => setHoraFim(e.target.value)}
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 p-2.5 border"
-                    />
-                </div>
+              {/* Coluna Direita: Formulário */}
+              <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
+                      <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Data</label>
+                          <input 
+                              type="date" 
+                              required
+                              value={dataAgendamento}
+                              onChange={(e) => setDataAgendamento(e.target.value)}
+                              // 4. Inputs com melhor padding e foco
+                              className="w-full border border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 p-3 outline-none transition"
+                          />
+                      </div>
+                      <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Hora Início</label>
+                          <input 
+                              type="time" 
+                              required
+                              value={horaInicio}
+                              onChange={(e) => setHoraInicio(e.target.value)}
+                              className="w-full border border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 p-3 outline-none transition"
+                          />
+                      </div>
+                  </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Local de Atendimento</label>
-                    <select 
-                        value={localAtendimento}
-                        onChange={(e) => setLocalAtendimento(e.target.value)}
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 p-2.5 border bg-white"
-                    >
-                        <option value="Online">Online</option>
-                        <option value="Presencial">Presencial (Endereço do Cliente)</option>
-                        <option value="Consultorio">No local do Profissional</option>
-                    </select>
-                </div>
+                  <div>
+                       <label className="block text-sm font-medium text-gray-700 mb-1">Hora Término (Opcional)</label>
+                       <input 
+                          type="time" 
+                          value={horaFim}
+                          onChange={(e) => setHoraFim(e.target.value)}
+                          className="w-full border border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 p-3 outline-none transition"
+                      />
+                  </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
-                    <textarea 
-                        rows={3}
-                        value={observacoes}
-                        onChange={(e) => setObservacoes(e.target.value)}
-                        placeholder="Detalhes adicionais para o profissional..."
-                        className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 p-2.5 border"
-                    />
-                </div>
+                  <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Local de Atendimento</label>
+                      <select 
+                          value={localAtendimento}
+                          onChange={(e) => setLocalAtendimento(e.target.value)}
+                          className="w-full border border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 p-3 outline-none transition bg-white"
+                      >
+                          <option value="Online">Online</option>
+                          <option value="Presencial">Presencial (Endereço do Cliente)</option>
+                          <option value="Consultorio">No local do Profissional</option>
+                      </select>
+                  </div>
 
-                <button 
-                    type="submit" 
-                    disabled={submitting}
-                    className="w-full py-4 bg-green-600 text-white rounded-xl font-bold text-lg hover:bg-green-700 transition shadow-md disabled:opacity-50 mt-4"
-                >
-                    {submitting ? "Enviando Pedido..." : "Confirmar Pedido"}
-                </button>
-            </form>
+                  <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                      <textarea 
+                          rows={3}
+                          value={observacoes}
+                          onChange={(e) => setObservacoes(e.target.value)}
+                          placeholder="Detalhes adicionais para o profissional..."
+                          className="w-full border border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 p-3 outline-none transition"
+                      />
+                  </div>
+
+                  {/* 5. Botão principal com melhor destaque */}
+                  <motion.button 
+                      type="submit" 
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      disabled={submitting}
+                      className="w-full py-4 bg-green-600 text-white rounded-xl font-extrabold text-xl hover:bg-green-700 transition shadow-lg shadow-green-200 disabled:opacity-50 mt-4"
+                  >
+                      {submitting ? "Enviando Pedido..." : "Confirmar Pedido"}
+                  </motion.button>
+              </form>
+          </div>
         </div>
       </motion.div>
     </div>
